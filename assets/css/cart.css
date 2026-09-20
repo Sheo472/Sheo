@@ -1,0 +1,203 @@
+/* --- GLASSMORPHISM CART STYLES --- */
+
+#cart {
+    margin: 40px auto;
+    max-width: 1000px;
+    background: rgba(94, 48, 35, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    color: #F7F4F3;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Page Title Area */
+.all-nav {
+    margin-top: 100px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.all-navbar p {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Table Styling */
+#cartTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px; /* Adds space between rows */
+    margin-bottom: 30px;
+}
+
+#cartTable th {
+    background-color: transparent;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #C08552;
+    font-size: 1.1rem;
+}
+
+#cartTable td {
+    padding: 15px 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05); /* Subtle row background */
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Rounded corners for individual rows */
+#cartTable td:first-child {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+#cartTable td:last-child {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+/* Product Image in Cart */
+#cartTable img {
+    max-width: 70px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+#cartTable img:hover {
+    transform: scale(1.1);
+}
+
+/* +/- Buttons in Table */
+#cartTable td button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.1rem;
+    margin: 0 8px;
+    backdrop-filter: blur(5px);
+}
+
+#cartTable td button:hover {
+    background-color: #C08552;
+    border-color: #C08552;
+    transform: translateY(-2px);
+}
+
+/* Total Section */
+#total1 {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 1.8rem;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#totalPrice {
+    color: #C08552; /* Match the theme's highlight color */
+    font-weight: 900;
+    margin-left: 10px;
+}
+
+/* Bottom Action Buttons */
+#clearCart {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.clearcart, .buynowcart {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    border-radius: 50px;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.buynowcart {
+    background: #fff;
+    color: #5E3023;
+    border: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.clearcart:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+.buynowcart:hover {
+    background: #C08552;
+    color: #fff;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+}
+
+/* Responsive Cart */
+@media (max-width: 768px) {
+    #cart {
+        padding: 15px;
+        margin: 20px 10px;
+    }
+
+    #cartTable, #cartTable thead, #cartTable tbody, #cartTable th, #cartTable td, #cartTable tr { 
+        display: block; 
+    }
+    
+    #cartTable thead tr { 
+        display: none; /* Hide headers on small screens */
+    }
+    
+    #cartTable tr {
+        margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+    }
+    
+    #cartTable td { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        padding: 10px;
+        background: transparent;
+    }
+    
+    #cartTable td::before {
+        content: attr(data-label); /* Requires data-label added to HTML, but acts as a fallback */
+        font-weight: bold;
+        color: #C08552;
+        text-transform: uppercase;
+    }
+}

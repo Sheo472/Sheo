@@ -1,0 +1,120 @@
+/* .................................................... checkout page ................................................................... */
+
+.containercheck {
+max-width: 1300px;
+margin: 0 auto;
+background: #C08552;
+box-shadow: 0 0 15px rgba(0,0,0,0.1);
+border-radius: 10px;
+padding: 40px;
+}
+h1 {
+font-size: 28px;
+margin-bottom: 20px;
+text-transform: uppercase;
+}
+.checkout-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid black;
+padding-bottom: 10px;
+margin-bottom: 30px;
+}
+.checkout-header a {
+color: #000;
+text-decoration: none;
+font-size: 14px;
+}
+.checkout-header a:hover {
+text-decoration: underline;
+}
+.checkout-form {
+display: flex;
+justify-content: space-between;
+}
+.form-section {
+width: 60%;
+}
+.form-group {
+display: flex;
+flex-wrap: wrap;
+margin-bottom: 20px;
+}
+.form-group label {
+flex: 1 1 100%;
+margin-bottom: 5px;
+}
+.form-group input, .form-group select {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+}
+.form-group select {
+cursor: pointer;
+}
+.btn {
+display: block;
+width: 100%;
+padding: 15px;
+font-size: 16px;
+color: white;
+background: #000;
+text-align: center;
+text-decoration: none;
+border: none;
+cursor: pointer;
+transition: background 0.3s;
+}
+.btn:hover {
+background: #444;
+}
+.order-summary {
+width: 35%;
+background: #f0f0f0;
+padding: 20px;
+border-radius: 10px;
+}
+.order-summary img {
+max-width: 100%;
+border-radius: 10px;
+}
+.summary-item {
+display: flex;
+justify-content: space-between;
+margin: 15px 0;
+}
+.total {
+font-weight: bold;
+font-size: 20px;
+}
+.promo {
+color: #007bff;
+cursor: pointer;
+}
+.promo:hover {
+text-decoration: underline;
+}
+
+
+
+@media (max-width: 600px){
+  .containercheck{
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  .checkout-form{
+    flex-direction: column;
+    gap: 15px;
+  }
+  .form-section {
+    width: 90%;
+  }
+  .order-summary{
+    width: 90%;
+  }
+}
+
+

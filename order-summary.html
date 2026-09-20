@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | Order Summary</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/order-summary.css">
+<script src="assets/js/cursor.js"></script>
+</head>
+<body>
+        <div class="navigation">
+        <div class="navigationbar">
+            <div class="logo">
+                <img src="assets/images/LOGO.png" alt="logo">
+            </div>
+            <div class="center-menu">
+                <a href="index.html">Home</a>
+                <a href="own.html">Design your own</a>
+                <a href="catgory.html">STORE</a>
+                <a href="javascript:void(0)" onclick="handleAccountNavigation()">Account</a>
+            </div>
+            <div class="info">
+                <div id="mySidepanel" class="sidepanel">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                    <a href="account.html#orders">Order</a>
+                    <a href="account.html#wishlist">Whishlist</a>
+                </div>
+                <div class="mySidepanel2">
+                    <button class="openbtn1" onclick="openNav()"><i class='bx bx-menu'></i></button>
+                    <div class="cart">
+                        <a href="ShowAddtocart.html"><button class="openbtn2"><i class='bx bx-cart'></i></button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="containerorder">
+    <h1>Order Summary</h1>
+    <div class="section" id="customer-details"></div>
+    <div class="section order-summary">
+        <h2>Product Details</h2>
+        <img id="checkout-image" src="" alt="Product Image">
+        <p id="checkout-name"></p>
+        <p id="checkout-price"></p>
+    </div>
+    <div class="summary-item">
+        <span>Items</span>
+        <span id="item-total"></span>
+    </div>
+    <div class="summary-item total">
+        <span>Total</span>
+        <span id="total-price"></span>
+    </div>
+    <div class="payment-method">
+        <h2>Payment Method</h2>
+        <label><input type="radio" name="payment" value="cod"> Cash on Delivery</label><br>
+        <label><input type="radio" name="payment" value="online"> Pay Online</label>
+    </div>
+    <button class="btn" onclick="processPayment()">Pay</button>
+</div>
+
+
+<script>
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        const data = {};
+        params.forEach((value, key) => {
+            data[key] = decodeURIComponent(value);
+        });
+        return data;
+    }
+
+    window.onload = () => {
+        const params = getQueryParams();
+
+        // Display product details
+        document.getElementById('checkout-image').src = params.image;
+        document.getElementById('checkout-name').textContent = params.name;
+        document.getElementById('checkout-price').textContent = `₹${params.price}.00`;
+        document.getElementById('item-total').textContent = `₹${params.price}.00`;
+        document.getElementById('total-price').textContent = `₹${params.price}.00`;
+
+        // Display customer details
+        document.getElementById('customer-details').innerHTML = `
+            <h2>Customer & Delivery Details</h2>
+            <p><strong>Name:</strong> ${params.firstname} ${params.lastname}</p>
+            <p><strong>Email:</strong> ${params.email}</p>
+            <p><strong>Phone:</strong> ${params.phone}</p>
+            <p><strong>Address:</strong> ${params.address}, ${params.city}, ${params.region}, ${params.zipcode}</p>
+        `;
+    };
+
+    function processPayment() {
+        const paymentMethod = document.querySelector('input[name="payment"]:checked');
+        if (!paymentMethod) {
+            alert("Please select a payment method");
+            return;
+        }
+
+        if (paymentMethod.value === "cod") {
+            alert("Order placed with Cash on Delivery!");
+        } else {
+            window.location.href = "payment-gateway.html";
+        }
+    }
+
+    function openNav() {
+        document.getElementById("mySidepanel").style.width = "250px";
+      }
+      
+      function closeNav() {
+        document.getElementById("mySidepanel").style.width = "0";
+      }
+
+</script>
+
+<script src="assets/js/auth.js"></script>
+</html>
+
+
+
+
+
+
+
+

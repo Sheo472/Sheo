@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | Store</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="assets/js/cursor.js"></script>
+</head>
+
+<body>
+    <div class="navigation">
+        <div class="navigationbar">
+            <div class="logo">
+                <img src="assets/images/LOGO.png" alt="logo">
+            </div>
+            <div class="center-menu">
+                <a href="index.html">Home</a>
+                <a href="own.html">Design your own</a>
+                <a href="catgory.html">STORE</a>
+                <a href="javascript:void(0)" onclick="handleAccountNavigation()">Account</a>
+            </div>
+            <div class="info">
+                <div id="mySidepanel" class="sidepanel">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                    <a href="account.html#orders">Order</a>
+                    <a href="account.html#wishlist">Whishlist</a>
+                </div>
+                <div class="mySidepanel2">
+                    <button class="openbtn1" onclick="openNav()"><i class='bx bx-menu'></i></button>
+                    <div class="cart">
+                        <a href="ShowAddtocart.html"><button class="openbtn2"><i class='bx bx-cart'></i></button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .category-wheel-section {
+            background: radial-gradient(circle at top, #5E3023 0%, #0f0f0f 80%);
+            position: relative;
+            overflow: hidden;
+            /* Added to prevent scrollbars */
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            height: calc(100vh - 90px);
+            margin-top: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Center the entire wheel */
+            overflow: hidden;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 1200px;
+            height: 1200px;
+            /* Removed bottom offset to show the full wheel */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0.4);
+            /* Scale down wheel size to 0.4 */
+        }
+
+        .wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #C08552;
+            /* Outer border of the wheel */
+            box-sizing: border-box;
+        }
+
+        .wheel-slot {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 320px;
+            height: 600px;
+            /* Reach from outer edge to center */
+            margin-left: -160px;
+            transform-origin: 50% 600px;
+            /* Rotate around the center of the wheel */
+            transform: rotate(calc(var(--i) * 30deg));
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 30px;
+            /* Spacing from outer border */
+            box-sizing: border-box;
+            z-index: 5;
+        }
+
+        .wheel-slot.active-slot {
+            z-index: 15;
+        }
+
+        /* Create the spoke lines using pseudo-elements */
+        .wheel-slot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -3px;
+            /* Align with right edge */
+            width: 6px;
+            height: 100%;
+            background: #C08552;
+            transform-origin: bottom center;
+            /* Rotate the line slightly so it points to the center from the right edge */
+            transform: rotate(15deg);
+        }
+
+        .wheel-slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -3px;
+            /* Align with left edge */
+            width: 6px;
+            height: 100%;
+            background: #C08552;
+            transform-origin: bottom center;
+            transform: rotate(-15deg);
+        }
+
+        .wheel-slot a {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+            transition: all 0.5s ease-in-out;
+            transform: scale(0.85);
+            filter: blur(5px) brightness(0.4);
+            text-decoration: none;
+        }
+
+        .wheel-slot.active-slot a {
+            transform: scale(1.1);
+            filter: blur(0px) brightness(1);
+            z-index: 15;
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: #0a0a0a;
+            border: 6px solid #C08552;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: inset 0 0 50px #5E3023;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .wheel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.3s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .wheel-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .wheel-btn-prev {
+            left: 50px;
+        }
+
+        .wheel-btn-next {
+            right: 50px;
+        }
+    </style>
+    <div class="category-wheel-section">
+        <div class="cat-nav" style="position: absolute; top: 0; width: 100%; z-index: 20; padding-top: 20px;">
+            <div class="catgory-navbar" style="margin: 0 auto; background: transparent; box-shadow: none;">
+                <p style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">STORE</p>
+            </div>
+        </div>
+
+        <div class="wheel-wrapper">
+            <div class="wheel-container">
+                <div class="wheel">
+                    <div class="wheel-slot" style="--i: 0;">
+                        <a href="aesthetic.html">
+                            <div class="maincatg">
+                                <div class="catgimg1"></div>
+                                <div class="desc2">AESTHETIC</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 1;">
+                        <a href="anime.html">
+                            <div class="maincatg">
+                                <div class="catgimg2"></div>
+                                <div class="desc2">anime</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 2;">
+                        <a href="coffee.html">
+                            <div class="maincatg">
+                                <div class="catgimg3"></div>
+                                <div class="desc2">coffe</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 3;">
+                        <a href="converse.html">
+                            <div class="maincatg">
+                                <div class="catgimg4"></div>
+                                <div class="desc2">converse</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 4;">
+                        <a href="nike.html">
+                            <div class="maincatg">
+                                <div class="catgimg5"></div>
+                                <div class="desc2">nike</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 5;">
+                        <a href="sport.html">
+                            <div class="maincatg">
+                                <div class="catgimg6"></div>
+                                <div class="desc2">sport</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 6;">
+                        <a href="cars.html">
+                            <div class="maincatg">
+                                <div class="catgimg7"></div>
+                                <div class="desc2">cars</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 7;">
+                        <a href="universe.html">
+                            <div class="maincatg">
+                                <div class="catgimg8"></div>
+                                <div class="desc2">universe</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 8;">
+                        <a href="concert.html">
+                            <div class="maincatg">
+                                <div class="catgimg9"></div>
+                                <div class="desc2">concert</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 9;">
+                        <a href="bling.html">
+                            <div class="maincatg">
+                                <div class="catgimg10"></div>
+                                <div class="desc2">bling</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 10;">
+                        <a href="butterfly.html">
+                            <div class="maincatg">
+                                <div class="catgimg11"></div>
+                                <div class="desc2">butterfly</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="wheel-slot" style="--i: 11;">
+                        <a href="wedding.html">
+                            <div class="maincatg">
+                                <div class="catgimg12"></div>
+                                <div class="desc2">wedding</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="wheel-center" id="wheel-center-text"></div>
+            </div>
+            <!-- Navigation buttons -->
+            <div class="wheel-btn wheel-btn-prev"><i class='bx bx-chevron-left'></i></div>
+            <div class="wheel-btn wheel-btn-next"><i class='bx bx-chevron-right'></i></div>
+        </div>
+    </div>
+
+    <!-- Premium Footer -->
+    <footer class="premium-footer">
+        <div class="pf-top">
+            <h1 class="pf-slogan">A shoe is just a shoe unless it's from</h1>
+            <img src="assets/images/BLACKLOGO1.png" alt="S.H.O.E.S factory" class="pf-logo">
+        </div>
+        <div class="pf-main">
+            <div class="pf-col">
+                <h3>ABOUT US</h3>
+                <a href="#">Company</a>
+                <a href="#">Contact</a>
+                <a href="#">Careers</a>
+                <a href="#">Affiliates</a>
+                <a href="catgory.html">Stores</a>
+            </div>
+            <div class="pf-col">
+                <h3>USEFUL LINKS</h3>
+                <a href="#">Support</a>
+                <a href="#">Refund</a>
+                <a href="#">FAQ</a>
+                <a href="#">Feedback</a>
+                <a href="#">Stories</a>
+            </div>
+            <div class="pf-col">
+                <h3>PRODUCTS</h3>
+                <a href="nike.html">Nike Air Force</a>
+                <a href="converse.html">Converse</a>
+                <a href="catgory.html">Adidas</a>
+                <a href="catgory.html">Air Jordan</a>
+                <a href="catgory.html">Jordans</a>
+            </div>
+            <div class="pf-col pf-newsletter">
+                <h3>Subscribe to our newsletter</h3>
+                <div class="pf-input-group">
+                    <input type="email" placeholder="Type here...">
+                    <button class="pf-join-btn">Join</button>
+                </div>
+                <div class="pf-socials">
+                    <a href="#"><i class='bx bxl-instagram'></i></a>
+                    <a href="#"><i class='bx bxl-facebook-circle'></i></a>
+                    <a href="#"><i class='bx bxl-twitter'></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const totalSlots = 12;
+            const anglePerSlot = 360 / totalSlots;
+            const wheel = document.querySelector('.wheel');
+            const slots = document.querySelectorAll('.wheel-slot');
+
+            let currentActiveIndex = 0;
+            let isAnimating = false;
+
+            if (wheel && typeof gsap !== 'undefined') {
+                const btnPrev = document.querySelector('.wheel-btn-prev');
+                const btnNext = document.querySelector('.wheel-btn-next');
+
+                function updateWheel(newIndex) {
+                    if (isAnimating) return;
+                    isAnimating = true;
+
+                    let normalizedIndex = ((newIndex % totalSlots) + totalSlots) % totalSlots;
+
+                    slots.forEach((s, i) => {
+                        if (i === normalizedIndex) {
+                            s.classList.add('active-slot');
+                            const catName = s.querySelector('.desc2').innerText;
+                            const centerText = document.getElementById('wheel-center-text');
+                            if (centerText) {
+                                centerText.innerText = catName;
+                            }
+                        } else {
+                            s.classList.remove('active-slot');
+                        }
+                    });
+
+                    gsap.to(wheel, {
+                        rotation: -newIndex * anglePerSlot,
+                        duration: 0.8,
+                        ease: "power2.inOut",
+                        onComplete: () => {
+                            isAnimating = false;
+                        }
+                    });
+                }
+
+                if (btnPrev && btnNext) {
+                    btnPrev.addEventListener('click', () => {
+                        currentActiveIndex--;
+                        updateWheel(currentActiveIndex);
+                    });
+
+                    btnNext.addEventListener('click', () => {
+                        currentActiveIndex++;
+                        updateWheel(currentActiveIndex);
+                    });
+                }
+
+                // Initialize first category
+                updateWheel(0);
+            }
+        });
+    </script>
+</body>
+
+</html>

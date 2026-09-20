@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | Product Detail</title>
+<link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/product-detail.css">
+<script src="assets/js/cursor.js"></script>
+</head>
+<body>
+        <div class="navigation">
+        <div class="navigationbar">
+            <div class="logo">
+                <img src="assets/images/LOGO.png" alt="logo">
+            </div>
+            <div class="center-menu">
+                <a href="index.html">Home</a>
+                <a href="own.html">Design your own</a>
+                <a href="catgory.html">STORE</a>
+                <a href="javascript:void(0)" onclick="handleAccountNavigation()">Account</a>
+            </div>
+            <div class="info">
+                <div id="mySidepanel" class="sidepanel">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                    <a href="account.html#orders">Order</a>
+                    <a href="account.html#wishlist">Whishlist</a>
+                </div>
+                <div class="mySidepanel2">
+                    <button class="openbtn1" onclick="openNav()"><i class='bx bx-menu'></i></button>
+                    <div class="cart">
+                        <a href="ShowAddtocart.html"><button class="openbtn2"><i class='bx bx-cart'></i></button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="containerproduct">
+    <!-- Product Image Section -->
+    <div class="image-gallery">
+        <img id="product-image" src="" alt="Product Image">
+    </div>
+
+    <!-- Product Info Section -->
+    <div class="product-info">
+        <h1 id="product-name">Product Name</h1>
+        
+        <!-- Dynamic Description -->
+        <p id="product-description">A pair of "<span id="dynamic-name">White AF1s</span>", customized with a subtle marble dye finish, and thick rope laces.</p>
+        
+        <div class="price" id="product-price">₹13,490.00</div>
+
+
+        <select class="dropdown">
+            <option>Select Size</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+        </select>
+
+        <input type="text" class="custom-text" placeholder="Custom text (optional)">
+
+        <button class="btn add">Add to Cart</button>
+        <button class="btn buy" onclick="redirectToCheckout()">Buy Now</button>
+
+        <!-- Care Instructions -->
+        <div class="care-instructions">
+            <h3>Care</h3>
+            <p>Our custom sneakers are durable and made to last. With good care, the artwork will last the life of your sneakers.</p>
+            <ul>
+                <li>Gently wash with water</li>
+                <li>Use sneaker cleaners, wipes & sprays</li>
+                <li>Keep away from harsh chemicals</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to get URL parameters
+    function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            image: params.get('image'),
+            name: params.get('name'),
+            price: params.get('price')
+        };
+    }
+
+    // Display the product details
+    window.onload = () => {
+        const { image, name, price } = getQueryParams();
+
+        if (image && name && price) {
+            document.getElementById('product-image').src = image;
+            document.getElementById('product-name').textContent = name;
+            document.getElementById('dynamic-name').textContent = name;
+            document.getElementById('product-price').textContent = `₹${price}.00`;
+        } else {
+            document.body.innerHTML = '<h1>Product not found!</h1>';
+        }
+    };
+
+    // Redirect to checkout with product details
+    function redirectToCheckout() {
+        const { image, name, price } = getQueryParams();
+
+        if (image && name && price) {
+            window.location.href = `checkout.html?image=${encodeURIComponent(image)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}`;
+        } else {
+            alert('Product details are missing!');
+        }
+    }
+
+
+    function openNav() {
+        document.getElementById("mySidepanel").style.width = "250px";
+      }
+      
+      function closeNav() {
+        document.getElementById("mySidepanel").style.width = "0";
+      }
+</script>
+
+<script src="assets/js/auth.js"></script>
+</html>
+
+
+
+
+
+
+
+

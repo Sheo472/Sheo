@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | My Account Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/login.css"> <!-- For input styles -->
+    <link rel="stylesheet" href="assets/css/account.css">
+    <script src="assets/js/cursor.js"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body id="account-body">
+    <div class="cursor-dot" data-cursor-dot></div>
+    <div class="cursor-outline" data-cursor-outline></div>
+
+    <div class="account-container">
+        <!-- Sidebar -->
+        <aside class="account-sidebar glass-panel">
+            <div class="sidebar-profile">
+                <div class="avatar" id="sidebar-avatar">GU</div>
+                <h3 id="sidebar-name">Guest User</h3>
+                <p id="sidebar-email">Not provided</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="active" onclick="switchTab('dashboard', this)"><i class='bx bx-home-alt'></i> Dashboard</a>
+                <a href="#" onclick="switchTab('orders', this)"><i class='bx bx-shopping-bag'></i> My Orders</a>
+                <a href="#" onclick="switchTab('profile', this)"><i class='bx bx-user'></i> My Profile</a>
+                <a href="#" onclick="switchTab('wishlist', this)"><i class='bx bx-heart'></i> My Wishlist</a>
+                <a href="#" onclick="switchTab('viewed', this)"><i class='bx bx-time-five'></i> Recently Viewed</a>
+                <a href="#" onclick="switchTab('points', this)"><i class='bx bx-medal'></i> Reward Points</a>
+                <a href="#" onclick="switchTab('support', this)"><i class='bx bx-support'></i> Support 24/7</a>
+            </nav>
+
+            <div class="sidebar-logout">
+                <a href="javascript:void(0)" onclick="logout()" class="btn-action outline" style="display: block; text-align: center; text-decoration: none;"><i class='bx bx-log-out'></i> Logout</a>
+                <a href="index.html" style="display: block; text-align: center; margin-top: 10px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem;">← Back to Store</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="account-main">
+
+            <!-- TAB: DASHBOARD -->
+            <div id="view-dashboard" class="tab-view active">
+                <h1>My Account Dashboard</h1>
+
+                <!-- Stat Cards -->
+                <div class="stat-grid">
+                    <div class="glass-panel stat-card">
+                        <div class="stat-header">
+                            <span>Total Orders</span>
+                            <div class="stat-icon"><i class='bx bx-shopping-bag'></i></div>
+                        </div>
+                        <p class="stat-value">0</p>
+                    </div>
+                    <div class="glass-panel stat-card">
+                        <div class="stat-header">
+                            <span>Total Spent</span>
+                            <div class="stat-icon"><i class='bx bx-rupee'></i></div>
+                        </div>
+                        <p class="stat-value">Rs. 0.00</p>
+                    </div>
+                    <div class="glass-panel stat-card">
+                        <div class="stat-header">
+                            <span>Wishlist Items</span>
+                            <div class="stat-icon"><i class='bx bx-heart'></i></div>
+                        </div>
+                        <p class="stat-value">0</p>
+                    </div>
+                    <div class="glass-panel stat-card">
+                        <div class="stat-header">
+                            <span>Reward Points</span>
+                            <div class="stat-icon"><i class='bx bx-medal'></i></div>
+                        </div>
+                        <p class="stat-value">0</p>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <section class="glass-panel profile-section">
+                    <div class="section-header">
+                        <h2>Your Profile</h2>
+                        <button class="edit-btn" onclick="document.querySelector('a[onclick*=\'profile\']').click()">Edit</button>
+                    </div>
+                    <div class="profile-details">
+                        <div class="sidebar-profile" style="border: none; padding: 0; min-width: 150px;">
+                            <div class="avatar" style="width: 100px; height: 100px; font-size: 2.5rem;" id="main-avatar">GU</div>
+                            <h3 id="main-name">Guest User</h3>
+                        </div>
+                        <div class="profile-info-grid">
+                            <div class="info-item">
+                                <label>Email Address</label>
+                                <p id="main-email">Not provided</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Phone Number</label>
+                                <p id="main-phone">+91 0000000000</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Address</label>
+                                <p id="main-address">Not provided</p>
+                            </div>
+                            <div class="info-item">
+                                <label>MFA Security (SMS OTP)</label>
+                                <p id="main-mfa-badge" style="font-weight: bold; color: #4cd137;">Active (SMS OTP)</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Orders Section -->
+                <section class="glass-panel recent-orders">
+                    <div class="section-header">
+                        <h2>Recent Orders</h2>
+                        <a href="#" onclick="document.querySelector('a[onclick*=\'orders\']').click()" style="color: #4cd137; text-decoration: none; font-size: 0.9rem;">View All Orders</a>
+                    </div>
+                    
+                    <div class="empty-state" style="text-align: center; padding: 30px; opacity: 0.7;">
+                        <i class='bx bx-box' style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <h3>No orders yet</h3>
+                        <p>When you buy something, it will appear here.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB: MY ORDERS -->
+            <div id="view-orders" class="tab-view">
+                <h1>My Orders</h1>
+                <section class="glass-panel recent-orders">
+                    <div class="empty-state" style="text-align: center; padding: 40px; opacity: 0.7;">
+                        <i class='bx bx-shopping-bag' style="font-size: 4rem; margin-bottom: 15px; color: #C08552;"></i>
+                        <h3>You haven't placed any orders yet</h3>
+                        <p>Explore our catalog and find your perfect pair of shoes!</p>
+                        <a href="index.html" class="btn-action" style="display: inline-block; text-decoration: none; margin-top: 20px;">Start Shopping</a>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB: MY PROFILE -->
+            <div id="view-profile" class="tab-view">
+                <h1>Edit Profile & Security</h1>
+                <section class="glass-panel">
+                    <form id="profile-form" class="account-form" onsubmit="saveProfile(event)">
+                        <div class="input-group">
+                            <input type="text" id="edit-name" name="name" required autocomplete="off">
+                            <label>Full Name</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="edit-email" name="email" required autocomplete="off">
+                            <label>Email Address</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="tel" id="edit-phone" name="phone" placeholder="+91..." autocomplete="off">
+                            <label>Mobile Number (SMS OTP)</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="edit-address" name="address" required autocomplete="off">
+                            <label>Delivery Address</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px;">
+                            <input type="checkbox" id="edit-mfa-toggle" name="mfa_toggle" checked style="width: 20px; height: 20px; cursor: pointer; accent-color: #ff9800;">
+                            <label for="edit-mfa-toggle" style="font-size: 0.95rem; color: #fff; cursor: pointer; margin: 0;">Enable Multi-Factor Authentication (MFA) via Mobile SMS OTP</label>
+                        </div>
+                        <button type="submit" class="auth-btn" style="width: auto; padding: 10px 30px;">Save Profile to Supabase</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- TAB: MY WISHLIST -->
+            <div id="view-wishlist" class="tab-view">
+                <h1>My Wishlist</h1>
+                <section class="glass-panel empty-state">
+                    <i class='bx bx-heart'></i>
+                    <h3>Your wishlist is empty</h3>
+                    <p>Save your favorite items here to review them later.</p>
+                    <a href="index.html" class="btn-action" style="display: inline-block; text-decoration: none; margin-top: 20px;">Start Shopping</a>
+                </section>
+            </div>
+
+            <!-- TAB: RECENTLY VIEWED -->
+            <div id="view-viewed" class="tab-view">
+                <h1>Recently Viewed</h1>
+                <section class="glass-panel empty-state">
+                    <i class='bx bx-history'></i>
+                    <h3>No browsing history</h3>
+                    <p>You haven't viewed any products recently.</p>
+                    <a href="index.html" class="btn-action" style="display: inline-block; text-decoration: none; margin-top: 20px;">Discover Products</a>
+                </section>
+            </div>
+
+            <!-- TAB: REWARD POINTS -->
+            <div id="view-points" class="tab-view">
+                <h1>Reward Points</h1>
+                <div class="stat-grid" style="grid-template-columns: 1fr;">
+                    <div class="glass-panel stat-card" style="text-align: center; padding: 40px;">
+                        <i class='bx bx-medal' style="font-size: 5rem; color: #C08552; margin-bottom: 10px;"></i>
+                        <h2 style="margin: 0; font-size: 3rem;">50 <span style="font-size: 1rem; color: rgba(255,255,255,0.6);">pts</span></h2>
+                        <p>Available Balance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SUPPORT 24/7 -->
+            <div id="view-support" class="tab-view">
+                <h1>Support 24/7</h1>
+                <section class="glass-panel" style="text-align: center; padding: 40px;">
+                    <i class='bx bx-support' style="font-size: 5rem; color: #C08552; margin-bottom: 20px;"></i>
+                    <h2>We're here to help</h2>
+                    <p style="margin-bottom: 30px; opacity: 0.8;">Our support team is available around the clock to assist you with any questions or concerns regarding your orders.</p>
+                    
+                    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                        <a href="mailto:support@shoesfactory.com" class="btn-action" style="text-decoration: none;"><i class='bx bx-envelope'></i> Email Us</a>
+                        <a href="tel:+1234567890" class="btn-action outline" style="text-decoration: none;"><i class='bx bx-phone-call'></i> Call Us</a>
+                        <a href="#" onclick="Tawk_API.toggle(); return false;" class="btn-action" style="text-decoration: none; background: #25D366; color: white;"><i class='bx bx-message-rounded-dots'></i> Chat Support</a>
+                    </div>
+                </section>
+            </div>
+
+
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/modal.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = 'login.html';
+            } else {
+                // Initial Load
+                updateProfileUI(currentUser);
+                
+                // Handle Hash Tabs
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    const el = document.querySelector(`.sidebar-nav a[onclick*="${hash}"]`);
+                    if (el && typeof switchTab === 'function') switchTab(hash, el);
+                }
+                
+                renderWishlist();
+            }
+        });
+        
+        function renderWishlist() {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            const container = document.getElementById('view-wishlist');
+            if (wishlist.length === 0) {
+                // Keep default empty state
+                return;
+            }
+            
+            let html = '<h1>My Wishlist</h1><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px;">';
+            wishlist.forEach((item, index) => {
+                let modsText = "";
+                if (item.customData && item.customData.modifications) {
+                    let mods = [];
+                    for (const [part, mod] of Object.entries(item.customData.modifications)) {
+                        if (mod.color) mods.push(`${part}: ${mod.color.name}`);
+                    }
+                    if (mods.length > 0) {
+                        modsText = `<p style="font-size: 0.8rem; color: #ccc; text-align: left; margin-bottom: 10px;">${mods.slice(0, 3).join(', ')}...</p>`;
+                    }
+                }
+                
+                html += `
+                    <div class="glass-panel" style="padding: 15px; text-align: center;">
+                        <img src="${item.imageSrc}" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.05);">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 5px;">${item.itemName}</h3>
+                        <p style="color: #C08552; font-weight: bold; margin-bottom: 5px;">Rs. ${item.price}</p>
+                        ${modsText}
+                        <div style="display: flex; gap: 8px; flex-direction: column;">
+                            <button class="btn-action" style="font-size: 0.9rem; padding: 8px;" onclick="purchaseFromWishlist(${index})">Purchase</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-action outline" style="flex: 1; font-size: 0.9rem; padding: 8px;" onclick="editFromWishlist(${index})"><i class='bx bx-edit'></i> Edit</button>
+                                <button class="btn-action outline" style="flex: 1; font-size: 0.9rem; padding: 8px;" onclick="addToCartFromWishlist(${index})"><i class='bx bx-cart-add'></i> Add</button>
+                                <button class="btn-action outline" style="font-size: 0.9rem; padding: 8px; color: #e74c3c; border-color: #e74c3c;" onclick="removeFromWishlist(${index})"><i class='bx bx-trash'></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        window.addToCartFromWishlist = function(index) {
+            let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            let item = wishlist[index];
+            if(item) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || {};
+                const size = prompt("Enter shoe size (6-10):", "8");
+                if(!size) return;
+                const finalKey = `${item.itemName} (Size: ${size})`;
+                if(cart[finalKey]) {
+                    cart[finalKey].quantity += 1;
+                } else {
+                    cart[finalKey] = {
+                        imageSrc: item.imageSrc,
+                        price: item.price,
+                        quantity: 1,
+                        size: size,
+                        customData: item.customData
+                    };
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                alert("Added to cart!");
+            }
+        };
+
+        window.purchaseFromWishlist = function(index) {
+            let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            let item = wishlist[index];
+            if(item) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || {};
+                const size = prompt("Enter shoe size (6-10):", "8");
+                if(!size) return;
+                const finalKey = `${item.itemName} (Size: ${size})`;
+                if(cart[finalKey]) {
+                    cart[finalKey].quantity += 1;
+                } else {
+                    cart[finalKey] = {
+                        imageSrc: item.imageSrc,
+                        price: item.price,
+                        quantity: 1,
+                        size: size,
+                        customData: item.customData
+                    };
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                window.location.href = "checkout-cart.html";
+            }
+        };
+
+        window.editFromWishlist = function(index) {
+            window.location.href = `own.html?editWishlist=${index}`;
+        };
+        
+        window.removeFromWishlist = function(index) {
+            let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            wishlist.splice(index, 1);
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+            
+            if (wishlist.length === 0) {
+                // Restore empty state
+                document.getElementById('view-wishlist').innerHTML = `
+                    <h1>My Wishlist</h1>
+                    <section class="glass-panel empty-state">
+                        <i class='bx bx-heart'></i>
+                        <h3>Your wishlist is empty</h3>
+                        <p>Save your favorite items here to review them later.</p>
+                        <a href="index.html" class="btn-action" style="display: inline-block; text-decoration: none; margin-top: 20px;">Start Shopping</a>
+                    </section>
+                `;
+            } else {
+                renderWishlist();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | Sign Up</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/signup.css">
+<script src="assets/js/cursor.js"></script>
+</head>
+<body id="auth-body">
+    <div class="auth-wrapper">
+        <div class="auth-left">
+            <div class="auth-brand">
+                <a href="index.html">
+                    <img src="assets/images/LOGO.png" alt="Logo" class="auth-logo">
+                </a>
+                <h1>Join the Movement</h1>
+                <p>Unlock exclusive drops, faster checkout, and more.</p>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-glass-card">
+                <h2>Create Your Account</h2>
+                <form id="signup-form">
+                    <div class="input-group">
+                        <input type="text" name="username" required autocomplete="off">
+                        <label>Username</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" name="email" required autocomplete="off">
+                        <label>Email Address</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" name="password" required autocomplete="off">
+                        <label>Password</label>
+                    </div>
+                    <button type="submit" class="auth-btn">Sign Up</button>
+                </form>
+                <p class="auth-link">Already have an account? <a href="login.html">Sign in</a></p>
+                <a href="index.html" class="back-home">← Back to Store</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>
+

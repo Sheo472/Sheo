@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHOES factory | Cart</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+<script src="assets/js/cursor.js"></script>
+</head>
+<body>
+      <div class="navigation">
+        <div class="navigationbar">
+            <div class="logo">
+                <img src="assets/images/LOGO.png" alt="logo">
+            </div>
+            <div class="center-menu">
+                <a href="index.html">Home</a>
+                <a href="own.html">Design your own</a>
+                <a href="catgory.html">STORE</a>
+                <a href="javascript:void(0)" onclick="handleAccountNavigation()">Account</a>
+            </div>
+            <div class="info">
+                <div id="mySidepanel" class="sidepanel">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+                    <a href="account.html#orders">Order</a>
+                    <a href="account.html#wishlist">Whishlist</a>
+                </div>
+                <div class="mySidepanel2">
+                    <button class="openbtn1" onclick="openNav()"><i class='bx bx-menu'></i></button>
+                    <div class="cart">
+                        <a href="ShowAddtocart.html"><button class="openbtn2"><i class='bx bx-cart'></i></button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  <div class="all-nav">
+    <div class="all-navbar">
+      <p>CART</p>
+    </div>
+  </div>
+  
+  <div id="cart">
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Cart items will be dynamically added here -->
+      </tbody>
+    </table>
+    <p id="total1"><strong>Total: Rs <span id="totalPrice">0</span></strong></p>
+    <p id="clearCart"><button class="clearcart" onclick="clearCart()">Clear Cart</button><button class="buynowcart" onclick="redirectToCheckout()">Check out</button>
+    </p>
+                </div>
+
+  <script>
+    function openNav() {
+      document.getElementById("mySidepanel").style.width = "250px";
+    }
+    
+    function closeNav() {
+      document.getElementById("mySidepanel").style.width = "0";
+    }
+    // Retrieve the cart from localStorage or initialize it if it doesn't exist
+    const cart = JSON.parse(localStorage.getItem('cart')) || {};
+
+    // Function to update the cart display
+    function updateCartDisplay() {
+      const cartTableBody = document.querySelector('#cartTable tbody');
+      const totalPriceElement = document.getElementById('totalPrice');
+
+      // Clear the table body
+      cartTableBody.innerHTML = '';
+
+      let totalPrice = 0;
+
+      // Loop through each item in the cart
+      for (const [itemName, itemData] of Object.entries(cart)) {
+        const { imageSrc, price, quantity, customData } = itemData;
+        const subtotal = price * quantity;
+        totalPrice += subtotal;
+
+        const row = document.createElement('tr');
+
+        // Image cell
+        const imgCell = document.createElement('td');
+        if (customData && customData.images && customData.images.length === 4) {
+            const grid = document.createElement('div');
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = '1fr 1fr';
+            grid.style.gap = '2px';
+            grid.style.width = '70px';
+            customData.images.forEach(imgData => {
+                const img = document.createElement('img');
+                img.src = imgData;
+                img.style.width = '100%';
+                img.style.aspectRatio = '1';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '4px';
+                grid.appendChild(img);
+            });
+            imgCell.appendChild(grid);
+        } else {
+            const img = document.createElement('img');
+            img.src = imageSrc;
+            img.style.maxWidth = '50px';
+            imgCell.appendChild(img);
+        }
+        row.appendChild(imgCell);
+
+        // Item name cell
+        const nameCell = document.createElement('td');
+        nameCell.textContent = itemName;
+        
+        if (customData && customData.modifications) {
+            const ul = document.createElement('ul');
+            ul.style.fontSize = '0.8rem';
+            ul.style.color = '#ccc';
+            ul.style.marginTop = '8px';
+            ul.style.paddingLeft = '15px';
+            ul.style.textAlign = 'left';
+            let hasMods = false;
+            for (const [part, mods] of Object.entries(customData.modifications)) {
+                const details = [];
+                if (mods.color) details.push(mods.color.name);
+                if (mods.material) details.push(mods.material.name);
+                if (details.length > 0) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>${part}:</strong> ${details.join(', ')}`;
+                    ul.appendChild(li);
+                    hasMods = true;
+                }
+            }
+            if (hasMods) nameCell.appendChild(ul);
+        }
+        
+        row.appendChild(nameCell);
+
+        // Price cell
+        const priceCell = document.createElement('td');
+        priceCell.textContent = `Rs ${price}`;
+        row.appendChild(priceCell);
+
+        // Quantity cell with plus and minus buttons
+        const quantityCell = document.createElement('td');
+        const minusButton = document.createElement('button');
+        minusButton.textContent = '-';
+        minusButton.addEventListener('click', () => changeQuantity(itemName, -1));
+        const quantitySpan = document.createElement('span');
+        quantitySpan.textContent = ` ${quantity} `;
+        const plusButton = document.createElement('button');
+        plusButton.textContent = '+';
+        plusButton.addEventListener('click', () => changeQuantity(itemName, 1));
+
+        quantityCell.appendChild(minusButton);
+        quantityCell.appendChild(quantitySpan);
+        quantityCell.appendChild(plusButton);
+        row.appendChild(quantityCell);
+
+        // Subtotal cell
+        const subtotalCell = document.createElement('td');
+        subtotalCell.textContent = `Rs ${subtotal.toFixed(2)}`;
+        row.appendChild(subtotalCell);
+
+        // Append the row to the table
+        cartTableBody.appendChild(row);
+      }
+
+      // Update the total price
+      totalPriceElement.textContent = totalPrice.toFixed(2);
+
+      // Save the updated cart to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Function to change the quantity of an item
+    function changeQuantity(itemName, change) {
+      if (cart[itemName]) {
+        const newQuantity = cart[itemName].quantity + change;
+        if (newQuantity < 1) {
+          // If quantity is less than 1, remove the item
+          removeItem(itemName);
+        } else {
+          cart[itemName].quantity = newQuantity;
+          updateCartDisplay();
+        }
+      }
+    }
+
+    // Function to remove an item from the cart
+    function removeItem(itemName) {
+      delete cart[itemName];
+      updateCartDisplay();
+    }
+
+    // Function to clear the entire cart
+    function clearCart() {
+      if (confirm('Are you sure you want to clear the cart?')) {
+        localStorage.removeItem('cart');
+        location.reload(); // Reload the page to reset the cart
+      }
+    }
+
+    // Display the cart when the page loads
+    updateCartDisplay();
+    function redirectToCheckout() {
+      // Save the cart data to localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+  
+      // Redirect to the checkout page
+      window.location.href = "checkout-cart.html";
+  }
+  
+  </script>
+<script src="assets/js/auth.js"></script>
+</html>
+
+
+
+
+
+
+
+

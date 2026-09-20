@@ -1,0 +1,47 @@
+/* ....................................................... order summery page.............................................. */
+
+
+.containerorder {
+max-width: 900px;
+margin: 0 auto;
+background: #C08552;
+box-shadow: 0 0 15px rgba(0,0,0,0.1);
+border-radius: 10px;
+padding: 40px;
+}
+h1 {
+font-size: 28px;
+margin-bottom: 20px;
+text-transform: uppercase;
+}
+.section {
+margin-bottom: 20px;
+}
+.order-summary img {
+max-width: 150px;
+border-radius: 10px;
+}
+.summary-item {
+display: flex;
+justify-content: space-between;
+margin: 10px 0;
+}
+.payment-method {
+margin: 20px 0;
+}
+.btn {
+display: block;
+width: 100%;
+padding: 15px;
+font-size: 16px;
+color: white;
+background: #000;
+text-align: center;
+border: none;
+cursor: pointer;
+}
+.btn:hover {
+background: #444;
+}
+
+

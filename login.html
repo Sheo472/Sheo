@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOES factory | Login & MFA Auth</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+    <script src="assets/js/cursor.js"></script>
+    <style>
+        .auth-tab-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 10px;
+        }
+        .auth-tab-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .auth-tab-btn.active {
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.15);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body id="auth-body">
+    <div class="auth-wrapper">
+        <div class="auth-left">
+            <div class="auth-brand">
+                <a href="index.html">
+                    <img src="assets/images/LOGO.png" alt="Logo" class="auth-logo">
+                </a>
+                <h1>Welcome Back</h1>
+                <p>Step into the future of footwear with Supabase Auth & MFA security.</p>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-glass-card">
+                <h2>Account Sign In</h2>
+
+                <!-- 2-Way Tabs for Email OTP and Email/Password -->
+                <div class="auth-tab-bar" style="display: flex; gap: 8px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 30px;">
+                    <button type="button" class="auth-tab-btn active" id="tab-email-otp-btn" onclick="toggleAuthTab('email-otp')" style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">✉️ Email OTP</button>
+                    <button type="button" class="auth-tab-btn" id="tab-email-btn" onclick="toggleAuthTab('email')" style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">🔑 Email & Password</button>
+                </div>
+
+                <!-- Tab 1: Email OTP Form (Free Supabase Email Service) -->
+                <div id="email-otp-auth-container">
+                    <form id="email-otp-send-form" onsubmit="sendEmailOTP(event)">
+                        <div class="input-group">
+                            <input type="email" name="otp_email" required autocomplete="off">
+                            <label>Email Address</label>
+                        </div>
+                        <button type="submit" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email OTP</button>
+                    </form>
+
+                    <form id="email-otp-verify-form" onsubmit="verifyEmailOTP(event)" style="display: none;">
+                        <div style="margin-bottom: 12px; font-size: 0.85rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(76,209,55,0.3);">
+                            ✉️ OTP / Magic link sent to <span id="display-email-otp-target" style="font-weight: bold; color: #fff;"></span>
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" id="email_otp_code" name="email_otp_code" pattern="[0-9]{4,6}" maxlength="6" required autocomplete="off">
+                            <label>Enter Code from Email Inbox</label>
+                        </div>
+                        <button type="submit" class="auth-btn">Verify Email OTP</button>
+                        <p class="auth-link" style="margin-top: 15px;"><a href="javascript:void(0)" onclick="goBackToEmailForm()">← Change Email</a></p>
+                    </form>
+                </div>
+
+                <!-- Tab 2: Email & Password Form -->
+                <div id="email-auth-container" style="display: none;">
+                    <form id="login-form" onsubmit="login(event)">
+                        <div class="input-group">
+                            <input type="email" name="email" required autocomplete="off">
+                            <label>Email Address</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" name="password" required autocomplete="off">
+                            <label>Password</label>
+                        </div>
+                        <button type="submit" class="auth-btn" style="margin-top: 15px;">Sign In with Password</button>
+                    </form>
+                </div>
+
+                <p class="auth-link" style="margin-top: 20px;">Don't have an account? <a href="signup.html">Create Account</a></p>
+                <a href="index.html" class="back-home">← Back to Store</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        function toggleAuthTab(type) {
+            const emailOtpContainer = document.getElementById('email-otp-auth-container');
+            const emailContainer = document.getElementById('email-auth-container');
+            
+            const emailOtpBtn = document.getElementById('tab-email-otp-btn');
+            const emailBtn = document.getElementById('tab-email-btn');
+
+            emailOtpContainer.style.display = 'none';
+            emailContainer.style.display = 'none';
+
+            emailOtpBtn.classList.remove('active');
+            emailBtn.classList.remove('active');
+
+            if (type === 'email-otp') {
+                emailOtpContainer.style.display = 'block';
+                emailOtpBtn.classList.add('active');
+            } else {
+                emailContainer.style.display = 'block';
+                emailBtn.classList.add('active');
+            }
+        }
+
+        if (window.location.hash === '#email') {
+            toggleAuthTab('email');
+        } else {
+            toggleAuthTab('email-otp');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,608 @@
+/* own.css - Styles for the 3D Configurator UI */
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Configurator Wrapper */
+.configurator-wrapper {
+    position: absolute;
+    top: 90px;
+    width: 100%;
+    height: calc(100vh - 90px);
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure 3D canvas fills available space and sits under UI */
+#shoe-3d-container {
+    flex-grow: 1;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Top UI Bar */
+.configurator-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 10;
+    box-sizing: border-box;
+    pointer-events: none; /* Let clicks pass through to 3D model */
+}
+
+.configurator-top-left, .configurator-top-right {
+    pointer-events: auto; /* Re-enable clicks for buttons/text */
+}
+
+.configurator-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.configurator-price {
+    font-size: 1rem;
+    color: #eee;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.configurator-top-right {
+    display: flex;
+    gap: 12px;
+}
+
+.icon-btn, .pill-btn {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #fff;
+}
+
+.icon-btn:hover, .pill-btn:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.pill-btn {
+    padding: 0 20px;
+    height: 40px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Bottom Control Panel */
+.configurator-bottom-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px; /* Reduced from 24px 32px to make footer smaller */
+    box-sizing: border-box;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.1);
+}
+
+.bottom-panel-left {
+    position: absolute;
+    left: 24px;
+}
+
+.bottom-panel-right {
+    position: absolute;
+    right: 24px;
+}
+
+.bottom-panel-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* Reduced from 16px to make footer tighter */
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Pagination Control */
+.configurator-pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.95rem;
+}
+.configurator-pagination i {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+.configurator-pagination i:hover {
+    color: #fff;
+}
+.configurator-pagination span {
+    color: rgba(255, 255, 255, 0.8);
+}
+.configurator-pagination b {
+    font-weight: 500;
+    color: #fff;
+}
+
+/* Materials Row */
+.materials-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 8px; /* Room for scrollbar */
+}
+.materials-row::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for clean UI */
+}
+
+.material-pill {
+    padding: 6px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #fff;
+    transition: all 0.2s;
+}
+
+.material-pill:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.material-pill.active {
+    border-color: #fff;
+    border-width: 1.5px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Colors Row */
+.colors-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 4px;
+    position: relative;
+    padding-bottom: 16px; /* space for absolute label */
+}
+
+.color-swatch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.color-swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.color-swatch-container.active .color-swatch {
+    transform: scale(1.2);
+}
+.color-swatch-container.active .color-swatch::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+}
+
+.color-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    bottom: 0px;
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.color-swatch-container.active .color-label {
+    opacity: 1;
+}
+
+/* Specific Swatch Colors */
+.swatch-red { background: #e74c3c; }
+.swatch-orange { background: #e67e22; }
+.swatch-pink { background: #ff69b4; }
+.swatch-purple { background: #9b59b6; }
+.swatch-lime { background: #2ecc71; }
+.swatch-neo { background: #00ffff; }
+.swatch-black { background: #222222; }
+.swatch-white { background: #ffffff; }
+.swatch-yellow { background: #ffcc00; }
+
+/* Custom Color Wheel Swatch */
+.swatch-custom {
+    background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    position: relative;
+    overflow: hidden;
+}
+.swatch-custom input[type="color"] {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Restored Global and Navbar Styles */
+body {
+    font-family: 'Outfit', Arial, Helvetica, sans-serif;
+    background: radial-gradient(circle at 50% 50%, #3a3a3a 0%, #111111 100%);
+    color: #fff;
+    scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    min-height: 100vh;
+}
+
+.logo img {
+    height: 50px;
+}
+
+
+
+.sidebar-btn:hover {
+    background: #E85D04;
+    color: #fff;
+}
+
+/* New Configurator UI Elements */
+.camera-presets-toolbar {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    padding: 12px 8px;
+    z-index: 10;
+}
+
+.preset-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-radius: 50%;
+}
+.preset-btn:hover, .preset-btn.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.floating-cta-container {
+    position: absolute;
+    right: 24px;
+    bottom: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 100;
+}
+
+.cta-btn-primary, .cta-btn-secondary {
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.cta-btn-primary {
+    background: #e74c3c;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+}
+.cta-btn-primary:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.cta-btn-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.cta-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.part-selector {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+.part-selector::-webkit-scrollbar {
+    display: none;
+}
+
+.part-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 4px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.part-btn.active, .part-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Decal Editor Panel */
+.decal-editor-panel {
+    position: absolute;
+    top: 130px;
+    left: 80px;
+    width: 250px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    gap: 16px;
+    z-index: 100;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.decal-editor-panel.visible {
+    display: flex;
+}
+.decal-editor-panel h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+.decal-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.decal-control-group label {
+    font-size: 0.85rem;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+}
+.decal-slider {
+    width: 100%;
+    accent-color: #e74c3c;
+}
+
+
+
+.openbtn1, .openbtn2 {
+    font-size: 30px;
+    cursor: pointer;
+    background-color: transparent;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+}
+
+.openbtn1:hover, .openbtn2:hover {
+    scale: 1.2;
+}
+
+/* Shoe Selector Drawer (Left Side) */
+.shoe-selector-drawer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0 24px 24px 0;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 50; /* Above the top bar */
+    display: flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    box-sizing: border-box;
+}
+
+.shoe-selector-drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-close-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: scale 0.2s;
+}
+.drawer-close-btn:hover {
+    scale: 1.2;
+}
+
+.drawer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px 16px;
+    transition: background 0.3s;
+}
+.drawer-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.drawer-item img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+}
+
+.drawer-item h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0 0 8px 0;
+}
+
+.drawer-item p {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin: 0 0 16px 0;
+}
+
+/* Dynamic Price Breakdown Container */
+.price-breakdown-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 16px 20px;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+}
+.price-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.price-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    opacity: 0;
+}
+.price-details.expanded {
+    max-height: 250px;
+    overflow-y: auto;
+    opacity: 1;
+    margin-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 12px;
+}
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #ccc;
+    margin-bottom: 8px;
+}
+
+.drawer-item .pill-btn {
+    width: 100%;
+
