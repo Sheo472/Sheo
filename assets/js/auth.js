@@ -465,6 +465,8 @@ function start1MinOTPTimer() {
     }, 1000);
 }
 
+let localGeneratedOTP = '';
+
 async function sendEmailOTP(event) {
     if (event) event.preventDefault();
     const form = document.getElementById('email-otp-send-form');
@@ -489,15 +491,73 @@ async function sendEmailOTP(event) {
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending Email OTP...';
+        submitBtn.textContent = 'Sending Custom Email OTP...';
     }
+
+    // Generate random 6-digit OTP code for EmailJS
+    localGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
     let sendSuccess = false;
     let supaErrorMessage = '';
+    let sentViaEmailJS = false;
 
-    if (supabaseClient) {
+    // Check for EmailJS credentials
+    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID');
+    let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID');
+    let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY');
+
+    // Prompt for EmailJS keys if not configured yet
+    if ((!emailjsService || !emailjsTemplate || !emailjsPublic) && typeof emailjs !== 'undefined') {
+        const setKeys = confirm(
+            "✉️ EmailJS Custom Email Setup:\n\nDo you want to configure EmailJS keys to send your Shoes Factory custom HTML email?\n\nClick OK to enter keys, or Cancel to try Supabase default sender."
+        );
+        if (setKeys) {
+            const keysInput = prompt(
+                "Enter your EmailJS keys separated by commas:\n\nFormat: SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY\n\nExample:\nservice_abc123, template_xyz789, pub_456789"
+            );
+            if (keysInput) {
+                const parts = keysInput.split(',').map(s => s.trim());
+                if (parts.length >= 3 && parts[0] && parts[1] && parts[2]) {
+                    emailjsService = parts[0];
+                    emailjsTemplate = parts[1];
+                    emailjsPublic = parts[2];
+                    localStorage.setItem('EMAILJS_SERVICE_ID', emailjsService);
+                    localStorage.setItem('EMAILJS_TEMPLATE_ID', emailjsTemplate);
+                    localStorage.setItem('EMAILJS_PUBLIC_KEY', emailjsPublic);
+                } else {
+                    alert("⚠️ Invalid key format. Please enter Service_ID, Template_ID, Public_Key separated by commas.");
+                }
+            }
+        }
+    }
+
+    // Attempt sending via EmailJS if keys are available
+    if (emailjsService && emailjsTemplate && emailjsPublic && typeof emailjs !== 'undefined') {
         try {
-            // Determine Redirect URL (works for live deployment GitHub Pages & local server)
+            console.log(`✉️ Sending OTP (${localGeneratedOTP}) via EmailJS to ${currentEmailOTP}...`);
+            const templateParams = {
+                to_email: currentEmailOTP,
+                email: currentEmailOTP,
+                user_email: currentEmailOTP,
+                otp_code: localGeneratedOTP,
+                token: localGeneratedOTP,
+                code: localGeneratedOTP,
+                confirmation_url: `${window.location.origin}/login.html`
+            };
+
+            await emailjs.send(emailjsService, emailjsTemplate, templateParams, emailjsPublic);
+            sendSuccess = true;
+            sentViaEmailJS = true;
+            console.log(`✅ Custom OTP email dispatched successfully via EmailJS!`);
+        } catch (ejsErr) {
+            console.error("EmailJS Error:", ejsErr);
+            supaErrorMessage = `EmailJS Error: ${ejsErr.text || ejsErr.message || JSON.stringify(ejsErr)}`;
+        }
+    }
+
+    // Fallback to Supabase if EmailJS is not used or failed
+    if (!sendSuccess && supabaseClient) {
+        try {
             const redirectUrl = window.location.href.includes('github.io')
                 ? 'https://sheo472.github.io/Sheo/login.html'
                 : window.location.origin + window.location.pathname;
@@ -513,15 +573,13 @@ async function sendEmailOTP(event) {
                 console.error("Supabase Email OTP error:", error.message);
                 supaErrorMessage = error.message;
             } else {
-                console.log(`✅ Email OTP dispatch request sent to ${currentEmailOTP} with redirect URL: ${redirectUrl}`);
+                console.log(`✅ Email OTP sent via Supabase to ${currentEmailOTP}`);
                 sendSuccess = true;
             }
         } catch (err) {
             console.error("Supabase Error:", err.message);
             supaErrorMessage = err.message || 'Unable to connect to Supabase.';
         }
-    } else {
-        supaErrorMessage = 'Supabase client is not initialized.';
     }
 
     if (submitBtn) {
@@ -539,34 +597,24 @@ async function sendEmailOTP(event) {
             if (isRateLimit) {
                 errorBox.innerHTML = `⚠️ <strong>Supabase Email Rate Limit Exceeded</strong><br><br>
                 Supabase limits free default emails to 3-4 per hour.<br>
-                To enable unlimited real-time delivery: Enable <strong>Custom SMTP (Gmail/Resend)</strong> in Supabase Dashboard.`;
+                To fix: Configure <strong>EmailJS</strong> or <strong>Custom SMTP</strong> for unlimited email sending.`;
             } else if (isHookError) {
                 errorBox.innerHTML = `⚠️ <strong>Supabase Auth Hook Error (405 Method Not Allowed)</strong><br><br>
                 An active Auth Hook in your Supabase Dashboard is failing.<br><br>
                 <strong>How to Fix in Supabase Dashboard:</strong><br>
                 1. Go to <strong>Authentication</strong> → <strong>Hooks</strong>.<br>
-                2. <strong>Disable/Remove</strong> the failing Hook (e.g. "Send Email" or "Send SMS" hook).<br>
+                2. <strong>Disable/Remove</strong> the failing Hook.<br>
                 3. Save changes and try sending OTP again.`;
             } else if (isMagicLinkError) {
-                errorBox.innerHTML = `⚠️ <strong>Error Sending Magic Link Email</strong><br><br>
-                Supabase failed to dispatch the email via SMTP.<br><br>
-                <strong>Common Causes & Fixes:</strong><br>
-                1. <strong>Built-in SMTP Limit Reached:</strong> Default free email provider reached quota limit.<br>
-                2. <strong>Custom SMTP Issue:</strong> If Custom SMTP is enabled in Supabase Dashboard -> Authentication -> Email Settings, ensure credentials (host <code>smtp.gmail.com</code>, port <code>587</code>, Gmail & App Password) are correct.`;
+                errorBox.innerHTML = `⚠️ <strong>Error Sending Email</strong><br><br>
+                Error details: ${supaErrorMessage}<br><br>
+                <strong>Quick Fix:</strong> Configure EmailJS keys or check your SMTP settings in Supabase.`;
             } else {
                 errorBox.innerHTML = `❌ <strong>OTP Dispatch Failed:</strong> ${supaErrorMessage}`;
             }
         }
 
-        if (isHookError) {
-            alert(`⚠️ Supabase Auth Hook Error (405 Method Not Allowed)\n\nError: ${supaErrorMessage}\n\nCause:\nAn Auth Hook (e.g., Send Email Hook) is enabled in your Supabase Dashboard with a URL returning HTTP 405.\n\nQuick Fix:\n1. Open Supabase Dashboard -> Authentication -> Hooks\n2. Disable/Delete the failing Hook\n3. Save and re-test sending OTP.`);
-        } else if (isRateLimit) {
-            alert(`⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nSolution:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`);
-        } else if (isMagicLinkError) {
-            alert(`⚠️ Error Sending Magic Link Email!\n\nError: ${supaErrorMessage}\n\nWhy this happens:\nSupabase's SMTP email sender encountered a delivery failure. This occurs when Supabase free rate limits are reached OR Custom SMTP settings in Supabase are misconfigured.\n\nHow to Fix:\n1. Go to Supabase Dashboard -> Authentication -> Email Settings\n2. Configure Custom SMTP with Gmail App Password or Resend API key.`);
-        } else {
-            alert(`❌ Failed to send OTP: ${supaErrorMessage}`);
-        }
+        alert(`❌ Failed to send OTP:\n\n${supaErrorMessage}`);
         return;
     }
 
@@ -582,7 +630,11 @@ async function sendEmailOTP(event) {
     const displaySpan = document.getElementById('display-email-otp-target');
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
-    alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam/Promotions folder) for your verification code.`);
+    if (sentViaEmailJS) {
+        alert(`✅ Shoes Factory Custom Email OTP sent to ${currentEmailOTP} via EmailJS!\n\nPlease check your Gmail Inbox for your 6-digit verification code.`);
+    } else {
+        alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam folder) for your verification code.`);
+    }
 }
 
 async function verifyEmailOTP(event) {
@@ -610,7 +662,20 @@ async function verifyEmailOTP(event) {
     let verifiedUser = null;
     let verifyErrorMsg = '';
 
-    if (supabaseClient) {
+    // Check if OTP matches locally generated EmailJS code
+    if (localGeneratedOTP && otp === localGeneratedOTP) {
+        console.log("✅ Verified via local EmailJS OTP code!");
+        verifiedUser = {
+            id: 'usr_' + Date.now(),
+            username: currentEmailOTP.split('@')[0],
+            name: currentEmailOTP.split('@')[0],
+            email: currentEmailOTP,
+            mobile: '',
+            address: '',
+            mfa_enabled: false,
+            loginTimestamp: Date.now()
+        };
+    } else if (supabaseClient) {
         try {
             const { data, error } = await supabaseClient.auth.verifyOtp({
                 email: currentEmailOTP,
