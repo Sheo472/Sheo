@@ -533,10 +533,21 @@ async function sendEmailOTP(event) {
         const isRateLimit = supaErrorMessage.toLowerCase().includes('rate limit');
         const isHookError = supaErrorMessage.toLowerCase().includes('hook') || supaErrorMessage.includes('405');
         const isMagicLinkError = supaErrorMessage.toLowerCase().includes('magic link') || supaErrorMessage.toLowerCase().includes('error sending');
+        const is504Timeout = supaErrorMessage.includes('504') || supaErrorMessage.toLowerCase().includes('timeout') || supaErrorMessage.toLowerCase().includes('timed out');
 
         if (errorBox) {
             errorBox.style.display = 'block';
-            if (isRateLimit) {
+            if (is504Timeout) {
+                errorBox.innerHTML = `⚠️ <strong>HTTP 504 Gateway Timeout (SMTP Connection Error)</strong><br><br>
+                Supabase timed out while attempting to dispatch the verification email.<br><br>
+                <strong>Why this happens:</strong><br>
+                Supabase tried connecting to your custom SMTP mail server (or default SMTP provider), but the connection hung and timed out.<br><br>
+                <strong>How to Fix in Supabase Dashboard:</strong><br>
+                1. Go to <strong>Authentication</strong> → <strong>Email Settings</strong>.<br>
+                2. If <strong>Custom SMTP</strong> is enabled, ensure Host is <code>smtp.gmail.com</code>, Port is <code>587</code>, and Username/App Password are correct.<br>
+                3. If Custom SMTP is misconfigured, toggle Custom SMTP <strong>OFF</strong> to use default settings, or update credentials.<br>
+                4. Go to <strong>Authentication</strong> → <strong>Hooks</strong> and disable any slow/unresponsive Send Email hooks.`;
+            } else if (isRateLimit) {
                 errorBox.innerHTML = `⚠️ <strong>Supabase Email Rate Limit Exceeded</strong><br><br>
                 Supabase limits free default emails to 3-4 per hour.<br>
                 To enable unlimited real-time delivery: Enable <strong>Custom SMTP (Gmail/Resend)</strong> in Supabase Dashboard.`;
@@ -558,7 +569,9 @@ async function sendEmailOTP(event) {
             }
         }
 
-        if (isHookError) {
+        if (is504Timeout) {
+            alert(`⚠️ HTTP 504 Gateway Timeout Error!\n\nError: ${supaErrorMessage}\n\nWhy this happens:\nSupabase timed out while connecting to the email server (SMTP connection hung or failed to respond within timeout).\n\nHow to Fix in Supabase Dashboard:\n1. Open Supabase Dashboard -> Authentication -> Email Settings\n2. Check your Custom SMTP configuration (Host: smtp.gmail.com, Port: 587 TLS, valid Gmail App Password)\n3. Or toggle 'Custom SMTP' OFF to revert to default SMTP dispatcher\n4. Check Authentication -> Hooks and disable any unresponsive Email Hooks.`);
+        } else if (isHookError) {
             alert(`⚠️ Supabase Auth Hook Error (405 Method Not Allowed)\n\nError: ${supaErrorMessage}\n\nCause:\nAn Auth Hook (e.g., Send Email Hook) is enabled in your Supabase Dashboard with a URL returning HTTP 405.\n\nQuick Fix:\n1. Open Supabase Dashboard -> Authentication -> Hooks\n2. Disable/Delete the failing Hook\n3. Save and re-test sending OTP.`);
         } else if (isRateLimit) {
             alert(`⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nSolution:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`);
