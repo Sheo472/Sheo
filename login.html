@@ -77,7 +77,7 @@
                     <form id="email-otp-verify-form" onsubmit="verifyEmailOTP(event)" style="display: none;">
                         <div
                             style="margin-bottom: 15px; font-size: 0.9rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(76,209,55,0.3); text-align: center;">
-                            ✉️ <strong>OTP</strong> sent to <span id="display-email-otp-target"
+                            ✉️ <strong>OTP / Magic Link</strong> sent to <span id="display-email-otp-target"
                                 style="font-weight: bold; color: #fff;"></span>
                         </div>
 
@@ -87,6 +87,12 @@
                             <label>Enter 6-Digit OTP Code</label>
                         </div>
                         <button type="submit" class="auth-btn">Verify OTP & Sign In</button>
+                        
+                        <div style="margin-top: 12px; font-size: 0.8rem; color: #aaa; text-align: center; line-height: 1.4;">
+                            📩 Check Gmail <strong>Spam/Promotions</strong> folder.<br>
+                            ⚡ <em>Testing? Use demo code: <strong style="color:#ff9800;">123456</strong></em>
+                        </div>
+
                         <p class="auth-link" style="margin-top: 15px;"><a href="javascript:void(0)"
                                 onclick="goBackToEmailForm()">← Change Email</a></p>
                     </form>
