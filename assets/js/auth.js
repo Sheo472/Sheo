@@ -548,7 +548,7 @@ async function sendEmailOTP(event) {
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
     const codeInput = document.getElementById('email_otp_code');
-    if (codeInput) codeInput.value = localGeneratedOTP;
+    if (codeInput) codeInput.value = '';
 
     // Start 1-Minute Expiry Countdown Timer immediately
     otpExpiryTimestamp = Date.now() + (60 * 1000); // 60 seconds
