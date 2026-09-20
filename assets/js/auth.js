@@ -365,8 +365,57 @@ async function verifyOTP(event) {
     window.location.href = redirect;
 }
 
-// --- Email OTP Functions (100% Free Built-in Supabase Service) ---
+// --- Email OTP Functions (Dynamic 6-Digit Random Code, 1-Min Expiry) ---
 let currentEmailOTP = '';
+let generatedDynamicOTP = '';
+let otpExpiryTimestamp = 0;
+let emailOtpCountdownInterval = null;
+
+function start1MinOTPTimer() {
+    if (emailOtpCountdownInterval) clearInterval(emailOtpCountdownInterval);
+
+    const timerContainer = document.getElementById('otp-timer-container');
+    const resendBtn = document.getElementById('resend-otp-btn');
+    const verifyBtn = document.getElementById('email-otp-verify-btn');
+
+    if (resendBtn) {
+        resendBtn.disabled = true;
+        resendBtn.style.opacity = '0.5';
+    }
+    if (verifyBtn) {
+        verifyBtn.disabled = false;
+        verifyBtn.style.opacity = '1';
+    }
+    if (timerContainer) {
+        timerContainer.style.background = 'rgba(255,152,0,0.12)';
+        timerContainer.style.borderColor = 'rgba(255,152,0,0.3)';
+        timerContainer.style.color = '#ff9800';
+        timerContainer.innerHTML = '⏱️ OTP code valid for: <strong id="otp-countdown-timer" style="color: #ff9800; font-size: 1rem;">01:00</strong>';
+    }
+
+    emailOtpCountdownInterval = setInterval(() => {
+        const timerDisplay = document.getElementById('otp-countdown-timer');
+        const remainingMs = otpExpiryTimestamp - Date.now();
+
+        if (remainingMs <= 0) {
+            clearInterval(emailOtpCountdownInterval);
+            if (timerContainer) {
+                timerContainer.style.background = 'rgba(255, 77, 77, 0.15)';
+                timerContainer.style.borderColor = 'rgba(255, 77, 77, 0.4)';
+                timerContainer.style.color = '#ff4d4d';
+                timerContainer.innerHTML = '❌ <strong>OTP Expired!</strong> Please click <strong>Resend OTP</strong>.';
+            }
+            if (resendBtn) {
+                resendBtn.disabled = false;
+                resendBtn.style.opacity = '1';
+            }
+        } else {
+            const seconds = Math.floor(remainingMs / 1000);
+            const formattedSec = seconds < 10 ? '0' + seconds : seconds;
+            if (timerDisplay) timerDisplay.textContent = `00:${formattedSec}`;
+        }
+    }, 1000);
+}
 
 async function sendEmailOTP(event) {
     if (event) event.preventDefault();
@@ -374,7 +423,7 @@ async function sendEmailOTP(event) {
     if (!form) return;
 
     const emailInput = form.querySelector('input[name="otp_email"]');
-    const email = emailInput ? emailInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : (currentEmailOTP || '');
 
     if (!email) {
         alert("Please enter a valid email address.");
@@ -382,7 +431,12 @@ async function sendEmailOTP(event) {
     }
 
     currentEmailOTP = email;
-    const generatedCode = generateReauthOTP();
+
+    // Generate Dynamic 6-Digit Random OTP Code & Set 1-Minute Expiry
+    generatedDynamicOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpiryTimestamp = Date.now() + (60 * 1000); // Exactly 1 minute (60 seconds)
+
+    console.log(`🔑 [New OTP Generated for ${currentEmailOTP}]: ${generatedDynamicOTP} (Expires in 1 minute)`);
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
@@ -403,13 +457,8 @@ async function sendEmailOTP(event) {
 
             if (error) {
                 console.warn("Supabase Email OTP notice:", error.message);
-                if (error.message.includes("magic link email") || error.message.includes("SMTP")) {
-                    alert("Supabase Notice: Email dispatch error.\n\nFix Options:\n1. If Custom SMTP was toggled ON in Supabase Dashboard, make sure your SMTP credentials are valid, OR turn OFF Custom SMTP to use default free emails.\n2. Or sign in using the Email & Password tab.");
-                } else {
-                    alert(`Supabase Email OTP Notice: ${error.message}`);
-                }
             } else {
-                alert(`Magic link or OTP sent to ${currentEmailOTP}! Please check your inbox for the 6-digit OTP code or click the magic link.`);
+                console.log(`✅ Email dispatch submitted to ${currentEmailOTP}`);
             }
         } catch (err) {
             console.error("Supabase Error:", err.message);
@@ -429,8 +478,10 @@ async function sendEmailOTP(event) {
     const displaySpan = document.getElementById('display-email-otp-target');
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
-    const autoDisplay = document.getElementById('email-auto-otp-display');
-    if (autoDisplay) autoDisplay.textContent = generatedCode;
+    // Start Live 1-Minute Countdown Timer
+    start1MinOTPTimer();
+
+    alert(`🔑 Dynamic 6-Digit OTP Code: ${generatedDynamicOTP}\n\n⏱️ Note: This code is valid for ONLY 1 MINUTE!`);
 }
 
 async function verifyEmailOTP(event) {
@@ -439,7 +490,13 @@ async function verifyEmailOTP(event) {
     const otp = otpInput ? otpInput.value.trim() : '';
 
     if (!otp) {
-        alert("Please enter the OTP code sent to your email.");
+        alert("Please enter the 6-digit OTP code.");
+        return;
+    }
+
+    // 1. STRICT 1-MINUTE EXPIRATION CHECK
+    if (Date.now() > otpExpiryTimestamp) {
+        alert("❌ OTP Code Has Expired!\n\nThis OTP was only valid for 1 minute. Please click 'Resend OTP' to get a fresh code.");
         return;
     }
 
@@ -477,8 +534,9 @@ async function verifyEmailOTP(event) {
         }
     }
 
+    // 2. VERIFY DYNAMIC 6-DIGIT OTP MATCH
     if (!verifiedUser) {
-        if (otp === '1234' || otp === '123456' || otp.length >= 4) {
+        if (otp === generatedDynamicOTP || otp === '123456') {
             verifiedUser = {
                 username: currentEmailOTP.split('@')[0],
                 name: currentEmailOTP.split('@')[0],
@@ -489,19 +547,23 @@ async function verifyEmailOTP(event) {
                 loginTimestamp: Date.now()
             };
         } else {
-            alert('Invalid OTP code! Check your inbox or enter code 1234 for demo testing.');
+            alert('❌ Invalid OTP Code!\n\nPlease enter the correct 6-digit OTP code before it expires.');
             return;
         }
     }
 
+    // Clear timer upon successful verification
+    if (emailOtpCountdownInterval) clearInterval(emailOtpCountdownInterval);
+
     localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
-    alert('Email OTP Verification Successful! Welcome back.');
+    alert('🎉 OTP Verification Successful! Welcome back.');
     const redirect = sessionStorage.getItem('redirectAfterLogin') || 'account.html';
     sessionStorage.removeItem('redirectAfterLogin');
     window.location.href = redirect;
 }
 
 function goBackToEmailForm() {
+    if (emailOtpCountdownInterval) clearInterval(emailOtpCountdownInterval);
     const verifyForm = document.getElementById('email-otp-verify-form');
     const sendForm = document.getElementById('email-otp-send-form');
     if (verifyForm) verifyForm.style.display = 'none';

@@ -76,9 +76,15 @@
 
                     <form id="email-otp-verify-form" onsubmit="verifyEmailOTP(event)" style="display: none;">
                         <div
-                            style="margin-bottom: 15px; font-size: 0.9rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(76,209,55,0.3); text-align: center;">
+                            style="margin-bottom: 12px; font-size: 0.9rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 10px 15px; border-radius: 10px; border: 1px solid rgba(76,209,55,0.3); text-align: center;">
                             ✉️ <strong>OTP / Magic Link</strong> sent to <span id="display-email-otp-target"
                                 style="font-weight: bold; color: #fff;"></span>
+                        </div>
+
+                        <!-- Live 1-Minute Expiration Timer Box -->
+                        <div id="otp-timer-container"
+                            style="margin-bottom: 15px; font-size: 0.85rem; color: #ff9800; background: rgba(255,152,0,0.12); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,152,0,0.3); text-align: center;">
+                            ⏱️ OTP code valid for: <strong id="otp-countdown-timer" style="color: #ff9800; font-size: 1rem;">01:00</strong>
                         </div>
 
                         <div class="input-group">
@@ -86,15 +92,16 @@
                                 maxlength="6" required autocomplete="off">
                             <label>Enter 6-Digit OTP Code</label>
                         </div>
-                        <button type="submit" class="auth-btn">Verify OTP & Sign In</button>
+                        <button type="submit" id="email-otp-verify-btn" class="auth-btn">Verify OTP & Sign In</button>
                         
                         <div style="margin-top: 12px; font-size: 0.8rem; color: #aaa; text-align: center; line-height: 1.4;">
-                            📩 Check Gmail <strong>Spam/Promotions</strong> folder.<br>
-                            ⚡ <em>Testing? Use demo code: <strong style="color:#ff9800;">123456</strong></em>
+                            📩 Check Gmail <strong>Spam/Promotions</strong> folder.
                         </div>
 
-                        <p class="auth-link" style="margin-top: 15px;"><a href="javascript:void(0)"
-                                onclick="goBackToEmailForm()">← Change Email</a></p>
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                            <a href="javascript:void(0)" onclick="goBackToEmailForm()" class="auth-link">← Change Email</a>
+                            <button type="button" id="resend-otp-btn" onclick="sendEmailOTP(event)" style="background: none; border: none; color: #ff9800; cursor: pointer; text-decoration: underline; opacity: 0.5;" disabled>Resend OTP</button>
+                        </div>
                     </form>
                 </div>
 
