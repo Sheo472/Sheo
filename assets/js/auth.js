@@ -583,7 +583,7 @@ async function sendEmailOTP(event) {
             sendSuccess = true;
             sentViaEmailJS = true;
             console.log(`✅ Shoes Factory Custom HTML Email dispatched via EmailJS!`);
-            alert(`✅ Shoes Factory Custom HTML Email sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox for your 6-digit code (${localGeneratedOTP}).`);
+            alert(`✅ Shoes Factory Verification Code sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox for your 6-digit verification code.`);
         } catch (ejsErr) {
             console.warn("EmailJS Error:", ejsErr);
             alert(`⚠️ EmailJS Notice: ${ejsErr.text || ejsErr.message || JSON.stringify(ejsErr)}`);
