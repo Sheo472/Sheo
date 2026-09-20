@@ -437,12 +437,16 @@ function start1MinOTPTimer() {
     if (timerContainer) {
         timerContainer.style.background = 'rgba(255,152,0,0.12)';
         timerContainer.style.borderColor = 'rgba(255,152,0,0.3)';
+        timerContainer.style.color = '#ff9800';
+        timerContainer.innerHTML = '⏱️ OTP code valid for: <strong id="otp-countdown-timer" style="color: #ff9800; font-size: 1rem;">01:00</strong>';
+    }
 
     emailOtpCountdownInterval = setInterval(() => {
+        const timerDisplay = document.getElementById('otp-countdown-timer');
         const remainingMs = otpExpiryTimestamp - Date.now();
+
         if (remainingMs <= 0) {
             clearInterval(emailOtpCountdownInterval);
-            if (timerDisplay) timerDisplay.textContent = '00:00';
             if (timerContainer) {
                 timerContainer.style.background = 'rgba(255, 77, 77, 0.15)';
                 timerContainer.style.borderColor = 'rgba(255, 77, 77, 0.4)';
@@ -481,7 +485,6 @@ async function sendEmailOTP(event) {
     }
 
     currentEmailOTP = email;
-    currentEmailGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
@@ -491,7 +494,6 @@ async function sendEmailOTP(event) {
 
     let sendSuccess = false;
     let supaErrorMessage = '';
-    let isFallbackMode = false;
 
     if (supabaseClient) {
         try {
@@ -528,17 +530,44 @@ async function sendEmailOTP(event) {
     }
 
     if (!sendSuccess) {
-        const is504Timeout = supaErrorMessage.includes('504') || supaErrorMessage.toLowerCase().includes('timeout') || supaErrorMessage.toLowerCase().includes('timed out');
-        console.warn("Supabase OTP dispatch unfulfilled. Activating Real-Time Fallback OTP mode.", supaErrorMessage);
-        isFallbackMode = true;
-        sendSuccess = true; // Fallback allows user to proceed seamlessly
+        const isRateLimit = supaErrorMessage.toLowerCase().includes('rate limit');
+        const isHookError = supaErrorMessage.toLowerCase().includes('hook') || supaErrorMessage.includes('405');
+        const isMagicLinkError = supaErrorMessage.toLowerCase().includes('magic link') || supaErrorMessage.toLowerCase().includes('error sending');
 
         if (errorBox) {
             errorBox.style.display = 'block';
-            errorBox.innerHTML = `⚡ <strong>Real-Time OTP Fallback Mode Active</strong><br>
-            ${is504Timeout ? 'Supabase SMTP timed out (HTTP 504).' : supaErrorMessage}<br>
-            Your Real-Time Verification Code is: <strong style="font-size: 1.1rem; color: #4cd137;">${currentEmailGeneratedOTP}</strong>`;
+            if (isRateLimit) {
+                errorBox.innerHTML = `⚠️ <strong>Supabase Email Rate Limit Exceeded</strong><br><br>
+                Supabase limits free default emails to 3-4 per hour.<br>
+                To enable unlimited real-time delivery: Enable <strong>Custom SMTP (Gmail/Resend)</strong> in Supabase Dashboard.`;
+            } else if (isHookError) {
+                errorBox.innerHTML = `⚠️ <strong>Supabase Auth Hook Error (405 Method Not Allowed)</strong><br><br>
+                An active Auth Hook in your Supabase Dashboard is failing.<br><br>
+                <strong>How to Fix in Supabase Dashboard:</strong><br>
+                1. Go to <strong>Authentication</strong> → <strong>Hooks</strong>.<br>
+                2. <strong>Disable/Remove</strong> the failing Hook (e.g. "Send Email" or "Send SMS" hook).<br>
+                3. Save changes and try sending OTP again.`;
+            } else if (isMagicLinkError) {
+                errorBox.innerHTML = `⚠️ <strong>Error Sending Magic Link Email</strong><br><br>
+                Supabase failed to dispatch the email via SMTP.<br><br>
+                <strong>Common Causes & Fixes:</strong><br>
+                1. <strong>Built-in SMTP Limit Reached:</strong> Default free email provider reached quota limit.<br>
+                2. <strong>Custom SMTP Issue:</strong> If Custom SMTP is enabled in Supabase Dashboard -> Authentication -> Email Settings, ensure credentials (host <code>smtp.gmail.com</code>, port <code>587</code>, Gmail & App Password) are correct.`;
+            } else {
+                errorBox.innerHTML = `❌ <strong>OTP Dispatch Failed:</strong> ${supaErrorMessage}`;
+            }
         }
+
+        if (isHookError) {
+            alert(`⚠️ Supabase Auth Hook Error (405 Method Not Allowed)\n\nError: ${supaErrorMessage}\n\nCause:\nAn Auth Hook (e.g., Send Email Hook) is enabled in your Supabase Dashboard with a URL returning HTTP 405.\n\nQuick Fix:\n1. Open Supabase Dashboard -> Authentication -> Hooks\n2. Disable/Delete the failing Hook\n3. Save and re-test sending OTP.`);
+        } else if (isRateLimit) {
+            alert(`⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nSolution:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`);
+        } else if (isMagicLinkError) {
+            alert(`⚠️ Error Sending Magic Link Email!\n\nError: ${supaErrorMessage}\n\nWhy this happens:\nSupabase's SMTP email sender encountered a delivery failure. This occurs when Supabase free rate limits are reached OR Custom SMTP settings in Supabase are misconfigured.\n\nHow to Fix:\n1. Go to Supabase Dashboard -> Authentication -> Email Settings\n2. Configure Custom SMTP with Gmail App Password or Resend API key.`);
+        } else {
+            alert(`❌ Failed to send OTP: ${supaErrorMessage}`);
+        }
+        return;
     }
 
     // Set 1-Minute Expiry and Start Countdown Timer
@@ -553,18 +582,7 @@ async function sendEmailOTP(event) {
     const displaySpan = document.getElementById('display-email-otp-target');
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
-    const autoDisplay = document.getElementById('email-auto-otp-display');
-    const autoCard = document.getElementById('email-auto-otp-card');
-    const otpInput = document.getElementById('email_otp_code');
-    if (autoDisplay) autoDisplay.textContent = currentEmailGeneratedOTP;
-    if (autoCard) autoCard.style.display = 'block';
-    if (otpInput && isFallbackMode) otpInput.value = currentEmailGeneratedOTP;
-
-    if (isFallbackMode) {
-        alert(`⚡ Real-Time Magic OTP Generated!\n\nDue to Supabase SMTP timeout (${supaErrorMessage || 'HTTP 504'}), your instant verification code is:\n\n👉  ${currentEmailGeneratedOTP}  👈\n\nIt is now auto-filled into the form. Click 'Verify OTP & Sign In' to log in.`);
-    } else {
-        alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam/Promotions folder) for your verification code.`);
-    }
+    alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam/Promotions folder) for your verification code.`);
 }
 
 async function verifyEmailOTP(event) {
@@ -592,7 +610,6 @@ async function verifyEmailOTP(event) {
     let verifiedUser = null;
     let verifyErrorMsg = '';
 
-    // A. Try Real Supabase Verification first if client available
     if (supabaseClient) {
         try {
             const { data, error } = await supabaseClient.auth.verifyOtp({
@@ -629,28 +646,13 @@ async function verifyEmailOTP(event) {
         }
     }
 
-    // B. Fallback to Local Real-Time OTP verification if Supabase verify did not complete
-    if (!verifiedUser && currentEmailGeneratedOTP && otp === currentEmailGeneratedOTP) {
-        console.log("✅ Verified via Real-Time Fallback OTP code.");
-        verifiedUser = {
-            id: 'usr_' + Date.now(),
-            username: currentEmailOTP.split('@')[0],
-            name: currentEmailOTP.split('@')[0],
-            email: currentEmailOTP,
-            mobile: '',
-            address: '',
-            mfa_enabled: false,
-            loginTimestamp: Date.now()
-        };
-    }
-
     if (verifyBtn) {
         verifyBtn.disabled = false;
         verifyBtn.textContent = 'Verify OTP & Sign In';
     }
 
     if (!verifiedUser) {
-        alert(`❌ Verification Failed!\n\n${verifyErrorMsg || 'Invalid 6-digit OTP code entered.'}\n\nPlease enter the correct 6-digit verification code and try again.`);
+        alert(`❌ Verification Failed!\n\n${verifyErrorMsg || 'Invalid 6-digit OTP code entered.'}\n\nPlease check the code sent to your Gmail inbox and try again.`);
         return;
     }
 
@@ -1033,84 +1035,4 @@ function sendChatMessage() {
         chatBody.appendChild(aiDiv);
         chatBody.scrollTop = chatBody.scrollHeight;
     }, 1000);
-}
-
-// --- Auto-Process URL Parameters (e.g. ?otp_email=cektroe@gmail.com) & Magic Link Token Redirects ---
-async function initAuthOnLoad() {
-    // A. Check for Supabase Magic Link Token Session Redirect
-    if (supabaseClient) {
-        try {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user) {
-                const supaUser = session.user;
-                const verifiedUser = {
-                    id: supaUser.id,
-                    username: supaUser.email.split('@')[0],
-                    name: supaUser.email.split('@')[0],
-                    email: supaUser.email,
-                    mobile: '',
-                    address: '',
-                    mfa_enabled: false,
-                    loginTimestamp: Date.now()
-                };
-                localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
-                console.log("✅ Authenticated via Supabase Magic Link session redirect!");
-                if (window.location.pathname.includes('login.html')) {
-                    alert('🎉 Magic Link Signed In Successfully! Welcome back.');
-                    const redirect = sessionStorage.getItem('redirectAfterLogin') || 'account.html';
-                    sessionStorage.removeItem('redirectAfterLogin');
-                    window.location.href = redirect;
-                    return;
-                }
-            }
-
-            // Listen to Auth State Changes (for URL Hash parameters #access_token=...)
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session && session.user) {
-                    const supaUser = session.user;
-                    const verifiedUser = {
-                        id: supaUser.id,
-                        username: supaUser.email.split('@')[0],
-                        name: supaUser.email.split('@')[0],
-                        email: supaUser.email,
-                        mobile: '',
-                        address: '',
-                        mfa_enabled: false,
-                        loginTimestamp: Date.now()
-                    };
-                    localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
-                    if (window.location.pathname.includes('login.html')) {
-                        alert('🎉 Magic Link Signed In Successfully! Welcome back.');
-                        const redirect = sessionStorage.getItem('redirectAfterLogin') || 'account.html';
-                        sessionStorage.removeItem('redirectAfterLogin');
-                        window.location.href = redirect;
-                    }
-                }
-            });
-        } catch (e) {
-            console.warn("Supabase auth session check notice:", e);
-        }
-    }
-
-    // B. Check for Query Parameters (e.g. ?otp_email=cektroe@gmail.com or ?email=cektroe@gmail.com)
-    const urlParams = new URLSearchParams(window.location.search);
-    const emailParam = urlParams.get('otp_email') || urlParams.get('email');
-    if (emailParam) {
-        console.log("URL email parameter detected:", emailParam);
-        const emailInput = document.querySelector('input[name="otp_email"]');
-        if (emailInput) {
-            emailInput.value = emailParam;
-            currentEmailOTP = emailParam;
-            // Trigger OTP dispatch automatically
-            setTimeout(() => {
-                sendEmailOTP();
-            }, 300);
-        }
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAuthOnLoad);
-} else {
-    initAuthOnLoad();
 }
