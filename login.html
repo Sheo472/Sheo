@@ -75,7 +75,7 @@
                             <input type="email" name="otp_email" required autocomplete="off">
                             <label>Email Address</label>
                         </div>
-                        <button type="button" onclick="sendEmailOTP(event)" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email
+                        <button type="submit" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email
                             OTP</button>
                     </form>
 
@@ -97,7 +97,7 @@
                                 maxlength="6" required autocomplete="off">
                             <label>Enter 6-Digit OTP Code</label>
                         </div>
-                        <button type="button" onclick="verifyEmailOTP(event)" id="email-otp-verify-btn" class="auth-btn">Verify OTP & Sign In</button>
+                        <button type="submit" id="email-otp-verify-btn" class="auth-btn">Verify OTP & Sign In</button>
                         
                         <div style="margin-top: 12px; font-size: 0.8rem; color: #aaa; text-align: center; line-height: 1.4;">
                             📩 Check Gmail <strong>Spam/Promotions</strong> folder.
@@ -112,7 +112,7 @@
 
                 <!-- Tab 2: Email & Password Form -->
                 <div id="email-auth-container" style="display: none;">
-                    <form id="login-form" onsubmit="login(event)">
+                    <form id="login-form" onsubmit="event.preventDefault(); login(event); return false;">
                         <div class="input-group">
                             <input type="email" name="email" required autocomplete="off">
                             <label>Email Address</label>
