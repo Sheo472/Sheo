@@ -497,15 +497,23 @@ async function sendEmailOTP(event) {
 
     if (supabaseClient) {
         try {
+            // Determine Redirect URL (works for live deployment GitHub Pages & local server)
+            const redirectUrl = window.location.href.includes('github.io')
+                ? 'https://sheo472.github.io/Sheo/login.html'
+                : window.location.origin + window.location.pathname;
+
             const { data, error } = await supabaseClient.auth.signInWithOtp({
-                email: currentEmailOTP
+                email: currentEmailOTP,
+                options: {
+                    emailRedirectTo: redirectUrl
+                }
             });
 
             if (error) {
                 console.error("Supabase Email OTP error:", error.message);
                 supaErrorMessage = error.message;
             } else {
-                console.log(`✅ Email OTP dispatch request sent to ${currentEmailOTP}`);
+                console.log(`✅ Email OTP dispatch request sent to ${currentEmailOTP} with redirect URL: ${redirectUrl}`);
                 sendSuccess = true;
             }
         } catch (err) {
