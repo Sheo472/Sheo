@@ -1034,3 +1034,83 @@ function sendChatMessage() {
         chatBody.scrollTop = chatBody.scrollHeight;
     }, 1000);
 }
+
+// --- Auto-Process URL Parameters (e.g. ?otp_email=cektroe@gmail.com) & Magic Link Token Redirects ---
+async function initAuthOnLoad() {
+    // A. Check for Supabase Magic Link Token Session Redirect
+    if (supabaseClient) {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+                const supaUser = session.user;
+                const verifiedUser = {
+                    id: supaUser.id,
+                    username: supaUser.email.split('@')[0],
+                    name: supaUser.email.split('@')[0],
+                    email: supaUser.email,
+                    mobile: '',
+                    address: '',
+                    mfa_enabled: false,
+                    loginTimestamp: Date.now()
+                };
+                localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
+                console.log("✅ Authenticated via Supabase Magic Link session redirect!");
+                if (window.location.pathname.includes('login.html')) {
+                    alert('🎉 Magic Link Signed In Successfully! Welcome back.');
+                    const redirect = sessionStorage.getItem('redirectAfterLogin') || 'account.html';
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    window.location.href = redirect;
+                    return;
+                }
+            }
+
+            // Listen to Auth State Changes (for URL Hash parameters #access_token=...)
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session && session.user) {
+                    const supaUser = session.user;
+                    const verifiedUser = {
+                        id: supaUser.id,
+                        username: supaUser.email.split('@')[0],
+                        name: supaUser.email.split('@')[0],
+                        email: supaUser.email,
+                        mobile: '',
+                        address: '',
+                        mfa_enabled: false,
+                        loginTimestamp: Date.now()
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
+                    if (window.location.pathname.includes('login.html')) {
+                        alert('🎉 Magic Link Signed In Successfully! Welcome back.');
+                        const redirect = sessionStorage.getItem('redirectAfterLogin') || 'account.html';
+                        sessionStorage.removeItem('redirectAfterLogin');
+                        window.location.href = redirect;
+                    }
+                }
+            });
+        } catch (e) {
+            console.warn("Supabase auth session check notice:", e);
+        }
+    }
+
+    // B. Check for Query Parameters (e.g. ?otp_email=cektroe@gmail.com or ?email=cektroe@gmail.com)
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('otp_email') || urlParams.get('email');
+    if (emailParam) {
+        console.log("URL email parameter detected:", emailParam);
+        const emailInput = document.querySelector('input[name="otp_email"]');
+        if (emailInput) {
+            emailInput.value = emailParam;
+            currentEmailOTP = emailParam;
+            // Trigger OTP dispatch automatically
+            setTimeout(() => {
+                sendEmailOTP();
+            }, 300);
+        }
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthOnLoad);
+} else {
+    initAuthOnLoad();
+}
