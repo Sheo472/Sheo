@@ -524,6 +524,7 @@ async function sendEmailOTP(event) {
     if (!sendSuccess) {
         const isRateLimit = supaErrorMessage.toLowerCase().includes('rate limit');
         const isHookError = supaErrorMessage.toLowerCase().includes('hook') || supaErrorMessage.includes('405');
+        const isMagicLinkError = supaErrorMessage.toLowerCase().includes('magic link') || supaErrorMessage.toLowerCase().includes('error sending');
 
         if (errorBox) {
             errorBox.style.display = 'block';
@@ -538,6 +539,12 @@ async function sendEmailOTP(event) {
                 1. Go to <strong>Authentication</strong> → <strong>Hooks</strong>.<br>
                 2. <strong>Disable/Remove</strong> the failing Hook (e.g. "Send Email" or "Send SMS" hook).<br>
                 3. Save changes and try sending OTP again.`;
+            } else if (isMagicLinkError) {
+                errorBox.innerHTML = `⚠️ <strong>Error Sending Magic Link Email</strong><br><br>
+                Supabase failed to dispatch the email via SMTP.<br><br>
+                <strong>Common Causes & Fixes:</strong><br>
+                1. <strong>Built-in SMTP Limit Reached:</strong> Default free email provider reached quota limit.<br>
+                2. <strong>Custom SMTP Issue:</strong> If Custom SMTP is enabled in Supabase Dashboard -> Authentication -> Email Settings, ensure credentials (host <code>smtp.gmail.com</code>, port <code>587</code>, Gmail & App Password) are correct.`;
             } else {
                 errorBox.innerHTML = `❌ <strong>OTP Dispatch Failed:</strong> ${supaErrorMessage}`;
             }
@@ -547,6 +554,8 @@ async function sendEmailOTP(event) {
             alert(`⚠️ Supabase Auth Hook Error (405 Method Not Allowed)\n\nError: ${supaErrorMessage}\n\nCause:\nAn Auth Hook (e.g., Send Email Hook) is enabled in your Supabase Dashboard with a URL returning HTTP 405.\n\nQuick Fix:\n1. Open Supabase Dashboard -> Authentication -> Hooks\n2. Disable/Delete the failing Hook\n3. Save and re-test sending OTP.`);
         } else if (isRateLimit) {
             alert(`⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nSolution:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`);
+        } else if (isMagicLinkError) {
+            alert(`⚠️ Error Sending Magic Link Email!\n\nError: ${supaErrorMessage}\n\nWhy this happens:\nSupabase's SMTP email sender encountered a delivery failure. This occurs when Supabase free rate limits are reached OR Custom SMTP settings in Supabase are misconfigured.\n\nHow to Fix:\n1. Go to Supabase Dashboard -> Authentication -> Email Settings\n2. Configure Custom SMTP with Gmail App Password or Resend API key.`);
         } else {
             alert(`❌ Failed to send OTP: ${supaErrorMessage}`);
         }
