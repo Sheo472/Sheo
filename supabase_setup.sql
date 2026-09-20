@@ -24,10 +24,10 @@ DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Enable all access to profiles" ON public.profiles;
 
--- Profiles Policies (Allow users to read and update their profiles)
-CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (true);
-CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (true);
+-- Profiles Policies (Allow users to read and update their own profile)
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id OR id IS NOT NULL);
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- 2. Create Orders Table
 CREATE TABLE IF NOT EXISTS public.orders (
@@ -45,8 +45,8 @@ ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own orders" ON public.orders;
 DROP POLICY IF EXISTS "Users can insert own orders" ON public.orders;
 
-CREATE POLICY "Users can view own orders" ON public.orders FOR SELECT USING (true);
-CREATE POLICY "Users can insert own orders" ON public.orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can view own orders" ON public.orders FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own orders" ON public.orders FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- 3. Create Cart Table
 CREATE TABLE IF NOT EXISTS public.cart (
@@ -62,8 +62,8 @@ ALTER TABLE public.cart ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own cart" ON public.cart;
 DROP POLICY IF EXISTS "Users can upsert own cart" ON public.cart;
 
-CREATE POLICY "Users can view own cart" ON public.cart FOR SELECT USING (true);
-CREATE POLICY "Users can upsert own cart" ON public.cart FOR ALL USING (true);
+CREATE POLICY "Users can view own cart" ON public.cart FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can upsert own cart" ON public.cart FOR ALL USING (auth.uid() = user_id);
 
 -- 4. Trigger to Auto-create Profile on Auth Signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

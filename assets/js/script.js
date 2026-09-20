@@ -3,13 +3,14 @@
 
 
 function openNav() {
-    document.getElementById("mySidepanel").style.width = "250px";
+    const panel = document.getElementById("mySidepanel");
+    if (panel) panel.style.width = "250px";
   }
   
   function closeNav() {
-    document.getElementById("mySidepanel").style.width = "0";
+    const panel = document.getElementById("mySidepanel");
+    if (panel) panel.style.width = "0";
   }
-
 
 // ................................................ MOVING HEADLINE ........................................................................ //
 if (typeof gsap !== 'undefined') {
@@ -64,12 +65,14 @@ if (typeof gsap !== 'undefined') {
 
 function scrollVideos(direction) {
   let container = document.querySelector(".shop-videos");
+  if (!container) return;
   let scrollAmount = 300; // Adjust based on your layout
   container.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
 }
 
 
 function toggleFAQ(button) {
+  if (!button || !button.parentElement || !button.parentElement.nextElementSibling) return;
   let answer = button.parentElement.nextElementSibling;
   if (answer.style.display === "none" || answer.style.display === "") {
       answer.style.display = "block";

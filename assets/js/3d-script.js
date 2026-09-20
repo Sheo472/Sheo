@@ -9,11 +9,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Fog for depth
     scene.fog = new THREE.FogExp2(0x000000, 0.05);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const width = container.clientWidth || window.innerWidth;
+    const height = container.clientHeight || 500;
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.set(0, 0, 7);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // optimize performance
     renderer.outputEncoding = THREE.sRGBEncoding;
     // Tone mapping for realistic lighting
