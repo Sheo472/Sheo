@@ -22,7 +22,8 @@
         <div class="auth-right">
             <div class="auth-glass-card">
                 <h2>Create Your Account</h2>
-                <form id="signup-form">
+                <div id="signup-alert-box" style="display: none; margin-bottom: 15px; padding: 12px; border-radius: 8px; font-size: 0.85rem; text-align: center;"></div>
+                <form id="signup-form" onsubmit="signup(event)">
                     <div class="input-group">
                         <input type="text" name="username" required autocomplete="off">
                         <label>Username</label>

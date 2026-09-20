@@ -17,16 +17,46 @@ let currentMobileNo = '';
 let resendTimer = null;
 let countdownSeconds = 30;
 
+// Helper to show signup message on page & alert
+function showSignupAlert(msg, isError = true) {
+    const alertBox = document.getElementById('signup-alert-box');
+    if (alertBox) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = isError ? 'rgba(255, 77, 77, 0.15)' : 'rgba(76, 209, 55, 0.15)';
+        alertBox.style.border = isError ? '1px solid rgba(255, 77, 77, 0.4)' : '1px solid rgba(76, 209, 55, 0.4)';
+        alertBox.style.color = isError ? '#ff4d4d' : '#4cd137';
+        alertBox.innerHTML = msg;
+    }
+    alert(msg);
+}
+
 // --- Sign Up (Supabase / Local Sync) ---
 async function signup(event) {
-    event.preventDefault();
-    const form = event.target;
-    const username = form.username.value.trim();
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
+    if (event) event.preventDefault();
+    const form = event.target || document.getElementById('signup-form');
+    if (!form) return;
+
+    const username = form.username ? form.username.value.trim() : '';
+    const email = form.email ? form.email.value.trim() : '';
+    const password = form.password ? form.password.value.trim() : '';
+
+    if (!email || !password) {
+        showSignupAlert("Please enter a valid email and password.", true);
+        return;
+    }
 
     const redirectUrl = window.location.origin + window.location.pathname.replace('signup.html', 'login.html');
 
+    // 1. Check LocalStorage Users First
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const existingLocalUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (existingLocalUser) {
+        showSignupAlert("⚠️ Account Already Exists!\n\nAn account with this email address already exists. Please click 'Sign in' to log into your account.", true);
+        return;
+    }
+
+    // 2. Check Supabase Auth
     if (supabaseClient) {
         try {
             const { data, error } = await supabaseClient.auth.signUp({
@@ -38,37 +68,55 @@ async function signup(event) {
                 }
             });
 
-            if (error) throw error;
+            if (error) {
+                const errMsg = error.message.toLowerCase();
+                if (errMsg.includes("already registered") || errMsg.includes("already exists") || error.status === 400) {
+                    showSignupAlert("⚠️ Account Already Exists!\n\nAn account with this email address is already registered. Please sign in instead.", true);
+                    return;
+                }
+                console.warn("Supabase signup note:", error.message);
+            }
 
-            if (data.user) {
-                // Upsert profile into Supabase
+            // Supabase returns data.user with empty identities array if account already exists!
+            if (data && data.user && data.user.identities && data.user.identities.length === 0) {
+                showSignupAlert("⚠️ Account Already Exists!\n\nAn account with this email address already exists. Please sign in to continue.", true);
+                return;
+            }
+
+            if (data && data.user) {
                 await supabaseClient.from('profiles').upsert({
                     id: data.user.id,
                     name: username,
                     email: email,
                     mfa_enabled: false
                 });
-            }
 
-            alert("Signup successful! Please check your email inbox to confirm your account.");
-            window.location.href = "login.html";
-            return;
+                // Also save to local user list
+                users.push({ username, email, password });
+                localStorage.setItem('users', JSON.stringify(users));
+
+                showSignupAlert("✅ Signup successful! Please check your email inbox to confirm your account.", false);
+                window.location.href = "login.html";
+                return;
+            }
         } catch (err) {
-            console.warn("Supabase signup notice, falling back to local sync:", err.message);
+            const errMsg = err.message ? err.message.toLowerCase() : '';
+            if (errMsg.includes("already registered") || errMsg.includes("already exists")) {
+                showSignupAlert("⚠️ Account Already Exists!\n\nAn account with this email address already exists. Please sign in instead.", true);
+                return;
+            }
+            console.warn("Supabase signup fallback notice:", err.message);
         }
     }
 
-    // Local Fallback Sync
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    if (users.find(u => u.email === email)) {
-        alert("An account with this email already exists!");
-        return;
-    }
+    // 3. Fallback Local Storage Save
     users.push({ username, email, password });
     localStorage.setItem('users', JSON.stringify(users));
 
-    alert("Signup successful! Please login.");
-    window.location.href = "login.html";
+    showSignupAlert("🎉 Account Created Successfully! Redirecting to sign in page...", false);
+    setTimeout(() => {
+        window.location.href = "login.html";
+    }, 1200);
 }
 
 // --- Traditional Login ---
@@ -478,10 +526,7 @@ async function sendEmailOTP(event) {
     const displaySpan = document.getElementById('display-email-otp-target');
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
-    // Start Live 1-Minute Countdown Timer
-    start1MinOTPTimer();
-
-    alert(`🔑 Dynamic 6-Digit OTP Code: ${generatedDynamicOTP}\n\n⏱️ Note: This code is valid for ONLY 1 MINUTE!`);
+    alert(`✅ OTP request submitted for ${currentEmailOTP}!\n\nPlease check your real Gmail inbox for your 6-digit verification code.`);
 }
 
 async function verifyEmailOTP(event) {
