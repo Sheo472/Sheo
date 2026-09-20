@@ -70,16 +70,16 @@
                         style="display: none; margin-bottom: 15px; font-size: 0.85rem; color: #ff4d4d; background: rgba(255, 77, 77, 0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center; line-height: 1.4;">
                     </div>
 
-                    <form id="email-otp-send-form" onsubmit="sendEmailOTP(event)">
+                    <form id="email-otp-send-form" onsubmit="event.preventDefault(); sendEmailOTP(event); return false;">
                         <div class="input-group">
                             <input type="email" name="otp_email" required autocomplete="off">
                             <label>Email Address</label>
                         </div>
-                        <button type="submit" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email
+                        <button type="button" onclick="sendEmailOTP(event)" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email
                             OTP</button>
                     </form>
 
-                    <form id="email-otp-verify-form" onsubmit="verifyEmailOTP(event)" style="display: none;">
+                    <form id="email-otp-verify-form" onsubmit="event.preventDefault(); verifyEmailOTP(event); return false;" style="display: none;">
                         <div
                             style="margin-bottom: 12px; font-size: 0.9rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 10px 15px; border-radius: 10px; border: 1px solid rgba(76,209,55,0.3); text-align: center;">
                             ✉️ <strong>OTP / Magic Link</strong> sent to <span id="display-email-otp-target"
@@ -97,7 +97,7 @@
                                 maxlength="6" required autocomplete="off">
                             <label>Enter 6-Digit OTP Code</label>
                         </div>
-                        <button type="submit" id="email-otp-verify-btn" class="auth-btn">Verify OTP & Sign In</button>
+                        <button type="button" onclick="verifyEmailOTP(event)" id="email-otp-verify-btn" class="auth-btn">Verify OTP & Sign In</button>
                         
                         <div style="margin-top: 12px; font-size: 0.8rem; color: #aaa; text-align: center; line-height: 1.4;">
                             📩 Check Gmail <strong>Spam/Promotions</strong> folder.

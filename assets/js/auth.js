@@ -488,7 +488,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function sendEmailOTP(event) {
-    if (event) event.preventDefault();
+    if (event) {
+        event.preventDefault();
+        if (event.stopPropagation) event.stopPropagation();
+    }
     const form = document.getElementById('email-otp-send-form');
     if (!form) return;
 
@@ -614,7 +617,10 @@ async function sendEmailOTP(event) {
 }
 
 async function verifyEmailOTP(event) {
-    if (event) event.preventDefault();
+    if (event) {
+        event.preventDefault();
+        if (event.stopPropagation) event.stopPropagation();
+    }
     const otpInput = document.getElementById('email_otp_code');
     const otp = otpInput ? otpInput.value.trim() : '';
 
