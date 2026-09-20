@@ -14,9 +14,13 @@ if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_UR
 }
 
 // --- EmailJS Configuration ---
-let EMAILJS_SERVICE_ID = localStorage.getItem('EMAILJS_SERVICE_ID') || 'service_svmzhel';
-let EMAILJS_TEMPLATE_ID = localStorage.getItem('EMAILJS_TEMPLATE_ID') || ''; // Add Template ID here
-let EMAILJS_PUBLIC_KEY = localStorage.getItem('EMAILJS_PUBLIC_KEY') || '';   // Add Public Key here
+let EMAILJS_SERVICE_ID = 'service_svmzhel';
+let EMAILJS_TEMPLATE_ID = 'template_xgdv9hn';
+let EMAILJS_PUBLIC_KEY = 'oDNyDe7XcWpkuZaag';
+
+localStorage.setItem('EMAILJS_SERVICE_ID', EMAILJS_SERVICE_ID);
+localStorage.setItem('EMAILJS_TEMPLATE_ID', EMAILJS_TEMPLATE_ID);
+localStorage.setItem('EMAILJS_PUBLIC_KEY', EMAILJS_PUBLIC_KEY);
 
 let currentMobileNo = '';
 let resendTimer = null;
@@ -558,26 +562,9 @@ async function sendEmailOTP(event) {
     let sendSuccess = false;
     let sentViaEmailJS = false;
 
-    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID') || (typeof EMAILJS_SERVICE_ID !== 'undefined' ? EMAILJS_SERVICE_ID : 'service_svmzhel');
-    let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID') || (typeof EMAILJS_TEMPLATE_ID !== 'undefined' ? EMAILJS_TEMPLATE_ID : '');
-    let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY') || (typeof EMAILJS_PUBLIC_KEY !== 'undefined' ? EMAILJS_PUBLIC_KEY : '');
-
-    // Prompt for missing EmailJS Template ID & Public Key if not saved yet
-    if ((!emailjsTemplate || !emailjsPublic) && typeof emailjs !== 'undefined') {
-        const inputKeys = prompt(
-            "✉️ EmailJS Shoes Factory Custom Template Setup:\n\nService ID is set to: service_svmzhel\n\nPlease enter your EmailJS Template ID and Public Key separated by commas:\n\nFormat: TEMPLATE_ID, PUBLIC_KEY\nExample: template_xyz123, pub_abc456"
-        );
-        if (inputKeys) {
-            const parts = inputKeys.split(',').map(s => s.trim());
-            if (parts.length >= 2 && parts[0] && parts[1]) {
-                emailjsTemplate = parts[0];
-                emailjsPublic = parts[1];
-                localStorage.setItem('EMAILJS_SERVICE_ID', emailjsService);
-                localStorage.setItem('EMAILJS_TEMPLATE_ID', emailjsTemplate);
-                localStorage.setItem('EMAILJS_PUBLIC_KEY', emailjsPublic);
-            }
-        }
-    }
+    let emailjsService = EMAILJS_SERVICE_ID;
+    let emailjsTemplate = EMAILJS_TEMPLATE_ID;
+    let emailjsPublic = EMAILJS_PUBLIC_KEY;
 
     if (emailjsService && emailjsTemplate && emailjsPublic && typeof emailjs !== 'undefined') {
         try {
