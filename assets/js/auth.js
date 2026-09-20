@@ -472,6 +472,12 @@ async function sendEmailOTP(event) {
 
     const emailInput = form.querySelector('input[name="otp_email"]');
     const email = emailInput ? emailInput.value.trim() : (currentEmailOTP || '');
+    const errorBox = document.getElementById('email-otp-error-box');
+
+    if (errorBox) {
+        errorBox.style.display = 'none';
+        errorBox.innerHTML = '';
+    }
 
     if (!email) {
         alert("Please enter a valid email address.");
@@ -480,17 +486,14 @@ async function sendEmailOTP(event) {
 
     currentEmailOTP = email;
 
-    // Generate Dynamic 6-Digit Random OTP Code & Set 1-Minute Expiry
-    generatedDynamicOTP = Math.floor(100000 + Math.random() * 900000).toString();
-    otpExpiryTimestamp = Date.now() + (60 * 1000); // Exactly 1 minute (60 seconds)
-
-    console.log(`🔑 [New OTP Generated for ${currentEmailOTP}]: ${generatedDynamicOTP} (Expires in 1 minute)`);
-
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending Email OTP...';
     }
+
+    let sendSuccess = false;
+    let supaErrorMessage = '';
 
     if (supabaseClient) {
         try {
@@ -504,19 +507,47 @@ async function sendEmailOTP(event) {
             });
 
             if (error) {
-                console.warn("Supabase Email OTP notice:", error.message);
+                console.error("Supabase Email OTP error:", error.message);
+                supaErrorMessage = error.message;
             } else {
-                console.log(`✅ Email dispatch submitted to ${currentEmailOTP}`);
+                console.log(`✅ Email OTP dispatch request sent to ${currentEmailOTP}`);
+                sendSuccess = true;
             }
         } catch (err) {
             console.error("Supabase Error:", err.message);
+            supaErrorMessage = err.message || 'Unable to connect to Supabase.';
         }
+    } else {
+        supaErrorMessage = 'Supabase client is not initialized.';
     }
 
     if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Send OTP to Email';
+        submitBtn.textContent = 'Send Real-Time Email OTP';
     }
+
+    if (!sendSuccess) {
+        const isRateLimit = supaErrorMessage.toLowerCase().includes('rate limit');
+        if (errorBox) {
+            errorBox.style.display = 'block';
+            if (isRateLimit) {
+                errorBox.innerHTML = `⚠️ <strong>Supabase Email Rate Limit Exceeded</strong><br><br>
+                Supabase limits free default emails to 3-4 per hour.<br>
+                To enable unlimited real-time delivery: Enable <strong>Custom SMTP (Gmail/Resend)</strong> in Supabase Dashboard.`;
+            } else {
+                errorBox.innerHTML = `❌ <strong>OTP Dispatch Failed:</strong> ${supaErrorMessage}`;
+            }
+        }
+        alert(isRateLimit 
+            ? `⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nWhy this happens:\nSupabase limits default free email sending to 3-4 emails/hour per project.\n\nSolution for Production:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`
+            : `❌ Failed to send OTP: ${supaErrorMessage}`
+        );
+        return;
+    }
+
+    // Set 1-Minute Expiry and Start Countdown Timer
+    otpExpiryTimestamp = Date.now() + (60 * 1000); // 60 seconds
+    start1MinOTPTimer();
 
     const sendForm = document.getElementById('email-otp-send-form');
     const verifyForm = document.getElementById('email-otp-verify-form');
@@ -526,7 +557,7 @@ async function sendEmailOTP(event) {
     const displaySpan = document.getElementById('display-email-otp-target');
     if (displaySpan) displaySpan.textContent = currentEmailOTP;
 
-    alert(`✅ OTP request submitted for ${currentEmailOTP}!\n\nPlease check your real Gmail inbox for your 6-digit verification code.`);
+    alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam/Promotions folder) for your verification code.`);
 }
 
 async function verifyEmailOTP(event) {
@@ -545,7 +576,14 @@ async function verifyEmailOTP(event) {
         return;
     }
 
+    const verifyBtn = document.getElementById('email-otp-verify-btn');
+    if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = 'Verifying OTP...';
+    }
+
     let verifiedUser = null;
+    let verifyErrorMsg = '';
 
     if (supabaseClient) {
         try {
@@ -555,7 +593,10 @@ async function verifyEmailOTP(event) {
                 type: 'email',
             });
 
-            if (!error && data.session) {
+            if (error) {
+                console.warn("Supabase Email OTP verify error:", error.message);
+                verifyErrorMsg = error.message;
+            } else if (data && (data.session || data.user)) {
                 const supaUser = data.user;
                 let { data: profile } = await supabaseClient
                     .from('profiles')
@@ -576,25 +617,18 @@ async function verifyEmailOTP(event) {
             }
         } catch (err) {
             console.warn("Supabase Email OTP verify notice:", err.message);
+            verifyErrorMsg = err.message;
         }
     }
 
-    // 2. VERIFY DYNAMIC 6-DIGIT OTP MATCH
+    if (verifyBtn) {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify OTP & Sign In';
+    }
+
     if (!verifiedUser) {
-        if (otp === generatedDynamicOTP || otp === '123456') {
-            verifiedUser = {
-                username: currentEmailOTP.split('@')[0],
-                name: currentEmailOTP.split('@')[0],
-                email: currentEmailOTP,
-                mobile: '',
-                address: '',
-                mfa_enabled: false,
-                loginTimestamp: Date.now()
-            };
-        } else {
-            alert('❌ Invalid OTP Code!\n\nPlease enter the correct 6-digit OTP code before it expires.');
-            return;
-        }
+        alert(`❌ Verification Failed!\n\n${verifyErrorMsg || 'Invalid 6-digit OTP code entered.'}\n\nPlease check the code sent to your Gmail inbox and try again.`);
+        return;
     }
 
     // Clear timer upon successful verification

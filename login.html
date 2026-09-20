@@ -65,6 +65,11 @@
 
                 <!-- Tab 1: Email OTP Form (Free Supabase Email Service) -->
                 <div id="email-otp-auth-container">
+                    <!-- Error / Notice Alert Container -->
+                    <div id="email-otp-error-box"
+                        style="display: none; margin-bottom: 15px; font-size: 0.85rem; color: #ff4d4d; background: rgba(255, 77, 77, 0.12); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center; line-height: 1.4;">
+                    </div>
+
                     <form id="email-otp-send-form" onsubmit="sendEmailOTP(event)">
                         <div class="input-group">
                             <input type="email" name="otp_email" required autocomplete="off">
