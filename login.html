@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 10px;
         }
+
         .auth-tab-btn {
             background: transparent;
             border: none;
@@ -25,6 +27,7 @@
             border-radius: 6px;
             transition: all 0.3s ease;
         }
+
         .auth-tab-btn.active {
             color: #ff9800;
             background: rgba(255, 152, 0, 0.15);
@@ -32,6 +35,7 @@
         }
     </style>
 </head>
+
 <body id="auth-body">
     <div class="auth-wrapper">
         <div class="auth-left">
@@ -48,9 +52,15 @@
                 <h2>Account Sign In</h2>
 
                 <!-- 2-Way Tabs for Email OTP and Email/Password -->
-                <div class="auth-tab-bar" style="display: flex; gap: 8px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 30px;">
-                    <button type="button" class="auth-tab-btn active" id="tab-email-otp-btn" onclick="toggleAuthTab('email-otp')" style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">✉️ Email OTP</button>
-                    <button type="button" class="auth-tab-btn" id="tab-email-btn" onclick="toggleAuthTab('email')" style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">🔑 Email & Password</button>
+                <div class="auth-tab-bar"
+                    style="display: flex; gap: 8px; margin-bottom: 25px; background: rgba(255, 255, 255, 0.05); padding: 5px; border-radius: 30px;">
+                    <button type="button" class="auth-tab-btn active" id="tab-email-otp-btn"
+                        onclick="toggleAuthTab('email-otp')"
+                        style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">✉️
+                        Email OTP</button>
+                    <button type="button" class="auth-tab-btn" id="tab-email-btn" onclick="toggleAuthTab('email')"
+                        style="flex: 1; text-align: center; border-radius: 25px; padding: 10px 15px; font-weight: 600; font-size: 0.9rem;">🔑
+                        Email & Password</button>
                 </div>
 
                 <!-- Tab 1: Email OTP Form (Free Supabase Email Service) -->
@@ -60,20 +70,25 @@
                             <input type="email" name="otp_email" required autocomplete="off">
                             <label>Email Address</label>
                         </div>
-                        <button type="submit" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email OTP</button>
+                        <button type="submit" class="auth-btn" style="margin-top: 20px;">Send Real-Time Email
+                            OTP</button>
                     </form>
 
                     <form id="email-otp-verify-form" onsubmit="verifyEmailOTP(event)" style="display: none;">
-                        <div style="margin-bottom: 12px; font-size: 0.85rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(76,209,55,0.3);">
-                            ✉️ OTP / Magic link sent to <span id="display-email-otp-target" style="font-weight: bold; color: #fff;"></span>
+                        <div
+                            style="margin-bottom: 15px; font-size: 0.9rem; color: #4cd137; background: rgba(76,209,55,0.12); padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(76,209,55,0.3); text-align: center;">
+                            ✉️ <strong>OTP</strong> sent to <span id="display-email-otp-target"
+                                style="font-weight: bold; color: #fff;"></span>
                         </div>
 
                         <div class="input-group">
-                            <input type="text" id="email_otp_code" name="email_otp_code" pattern="[0-9]{4,6}" maxlength="6" required autocomplete="off">
-                            <label>Enter Code from Email Inbox</label>
+                            <input type="text" id="email_otp_code" name="email_otp_code" pattern="[0-9]{4,6}"
+                                maxlength="6" required autocomplete="off">
+                            <label>Enter 6-Digit OTP Code</label>
                         </div>
-                        <button type="submit" class="auth-btn">Verify Email OTP</button>
-                        <p class="auth-link" style="margin-top: 15px;"><a href="javascript:void(0)" onclick="goBackToEmailForm()">← Change Email</a></p>
+                        <button type="submit" class="auth-btn">Verify OTP & Sign In</button>
+                        <p class="auth-link" style="margin-top: 15px;"><a href="javascript:void(0)"
+                                onclick="goBackToEmailForm()">← Change Email</a></p>
                     </form>
                 </div>
 
@@ -92,7 +107,8 @@
                     </form>
                 </div>
 
-                <p class="auth-link" style="margin-top: 20px;">Don't have an account? <a href="signup.html">Create Account</a></p>
+                <p class="auth-link" style="margin-top: 20px;">Don't have an account? <a href="signup.html">Create
+                        Account</a></p>
                 <a href="index.html" class="back-home">← Back to Store</a>
             </div>
         </div>
@@ -104,7 +120,7 @@
         function toggleAuthTab(type) {
             const emailOtpContainer = document.getElementById('email-otp-auth-container');
             const emailContainer = document.getElementById('email-auth-container');
-            
+
             const emailOtpBtn = document.getElementById('tab-email-otp-btn');
             const emailBtn = document.getElementById('tab-email-btn');
 
@@ -130,4 +146,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -409,7 +409,7 @@ async function sendEmailOTP(event) {
                     alert(`Supabase Email OTP Notice: ${error.message}`);
                 }
             } else {
-                alert(`Real-time Email OTP / Magic Link sent to ${currentEmailOTP}! Please check your inbox.`);
+                alert(`Magic link or OTP sent to ${currentEmailOTP}! Please check your inbox for the 6-digit OTP code or click the magic link.`);
             }
         } catch (err) {
             console.error("Supabase Error:", err.message);
