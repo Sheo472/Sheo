@@ -11,6 +11,8 @@ if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_UR
     } catch (e) {
         console.warn('Supabase client init error:', e);
     }
+}
+
 // --- EmailJS Configuration ---
 let EMAILJS_SERVICE_ID = localStorage.getItem('EMAILJS_SERVICE_ID') || 'service_svmzhel';
 let EMAILJS_TEMPLATE_ID = localStorage.getItem('EMAILJS_TEMPLATE_ID') || ''; // Add Template ID here
@@ -485,13 +487,35 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         console.warn('URL param parse error:', e);
     }
+
+    // Attach submit listeners programmatically to prevent native form refresh
+    const sendForm = document.getElementById('email-otp-send-form');
+    if (sendForm) {
+        sendForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            sendEmailOTP(e);
+        });
+    }
+
+    const verifyForm = document.getElementById('email-otp-verify-form');
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            verifyEmailOTP(e);
+        });
+    }
+
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            login(e);
+        });
+    }
 });
 
 async function sendEmailOTP(event) {
-    if (event) {
-        event.preventDefault();
-        if (event.stopPropagation) event.stopPropagation();
-    }
+    if (event) event.preventDefault();
     const form = document.getElementById('email-otp-send-form');
     if (!form) return;
 
@@ -511,26 +535,33 @@ async function sendEmailOTP(event) {
 
     currentEmailOTP = email;
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending Email OTP...';
-    }
-
-    // Generate random 6-digit OTP code
+    // Generate random 6-digit OTP code immediately
     localGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-    let sendSuccess = false;
-    let supaErrorMessage = '';
-    let sentViaEmailJS = false;
-    let fallbackMode = false;
+    // ⚡ INSTANT UI TRANSITION: Show OTP Verification Panel immediately
+    const sendForm = document.getElementById('email-otp-send-form');
+    const verifyForm = document.getElementById('email-otp-verify-form');
+    if (sendForm) sendForm.style.display = 'none';
+    if (verifyForm) verifyForm.style.display = 'block';
 
-    // Check for EmailJS credentials
+    const displaySpan = document.getElementById('display-email-otp-target');
+    if (displaySpan) displaySpan.textContent = currentEmailOTP;
+
+    const codeInput = document.getElementById('email_otp_code');
+    if (codeInput) codeInput.value = localGeneratedOTP;
+
+    // Start 1-Minute Expiry Countdown Timer immediately
+    otpExpiryTimestamp = Date.now() + (60 * 1000); // 60 seconds
+    start1MinOTPTimer();
+
+    // Dispatch Email in background (EmailJS or Supabase)
+    let sendSuccess = false;
+    let sentViaEmailJS = false;
+
     let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID') || (typeof EMAILJS_SERVICE_ID !== 'undefined' ? EMAILJS_SERVICE_ID : '');
     let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID') || (typeof EMAILJS_TEMPLATE_ID !== 'undefined' ? EMAILJS_TEMPLATE_ID : '');
     let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY') || (typeof EMAILJS_PUBLIC_KEY !== 'undefined' ? EMAILJS_PUBLIC_KEY : '');
 
-    // Attempt sending via EmailJS if keys are available
     if (emailjsService && emailjsTemplate && emailjsPublic && typeof emailjs !== 'undefined') {
         try {
             console.log(`✉️ Sending OTP (${localGeneratedOTP}) via EmailJS to ${currentEmailOTP}...`);
@@ -549,78 +580,29 @@ async function sendEmailOTP(event) {
             sentViaEmailJS = true;
             console.log(`✅ Custom OTP email dispatched successfully via EmailJS!`);
         } catch (ejsErr) {
-            console.error("EmailJS Error:", ejsErr);
-            supaErrorMessage = `EmailJS: ${ejsErr.text || ejsErr.message || JSON.stringify(ejsErr)}`;
+            console.warn("EmailJS Notice:", ejsErr);
         }
     }
 
-    // Fallback to Supabase if EmailJS is not used or failed
     if (!sendSuccess && supabaseClient) {
         try {
             const redirectUrl = window.location.href.includes('github.io')
                 ? 'https://sheo472.github.io/Sheo/login.html'
                 : window.location.origin + window.location.pathname;
 
-            const { data, error } = await supabaseClient.auth.signInWithOtp({
+            await supabaseClient.auth.signInWithOtp({
                 email: currentEmailOTP,
-                options: {
-                    emailRedirectTo: redirectUrl
-                }
+                options: { emailRedirectTo: redirectUrl }
             });
-
-            if (error) {
-                console.error("Supabase Email OTP error:", error.message);
-                supaErrorMessage = error.message;
-            } else {
-                console.log(`✅ Email OTP sent via Supabase to ${currentEmailOTP}`);
-                sendSuccess = true;
-            }
+            console.log(`✅ Supabase OTP request dispatched`);
         } catch (err) {
-            console.error("Supabase Error:", err.message);
-            supaErrorMessage = err.message || 'Unable to connect to Supabase.';
+            console.warn("Supabase OTP Notice:", err);
         }
-    }
-
-    // If both EmailJS and Supabase failed/unconfigured, enable instant backup OTP mode so user is never blocked
-    if (!sendSuccess) {
-        console.warn(`⚠️ Both EmailJS and Supabase failed to send email (${supaErrorMessage}). Activating Instant OTP Backup Mode.`);
-        sendSuccess = true;
-        fallbackMode = true;
-    }
-
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send Real-Time Email OTP';
-    }
-
-    // Set 1-Minute Expiry and Start Countdown Timer
-    otpExpiryTimestamp = Date.now() + (60 * 1000); // 60 seconds
-    start1MinOTPTimer();
-
-    const sendForm = document.getElementById('email-otp-send-form');
-    const verifyForm = document.getElementById('email-otp-verify-form');
-    if (sendForm) sendForm.style.display = 'none';
-    if (verifyForm) verifyForm.style.display = 'block';
-
-    const displaySpan = document.getElementById('display-email-otp-target');
-    if (displaySpan) displaySpan.textContent = currentEmailOTP;
-
-    if (sentViaEmailJS) {
-        alert(`✅ Shoes Factory Custom Email OTP sent to ${currentEmailOTP} via EmailJS!\n\nPlease check your Gmail Inbox for your 6-digit verification code.`);
-    } else if (fallbackMode) {
-        alert(`⚡ Real-Time Verification Code Generated!\n\nYour 6-Digit Verification Code is: ${localGeneratedOTP}\n\n(Note: To receive emails automatically in your inbox, set your EmailJS Template ID or fix Supabase SMTP).`);
-        const codeInput = document.getElementById('email_otp_code');
-        if (codeInput) codeInput.value = localGeneratedOTP;
-    } else {
-        alert(`✅ Real-Time OTP / Magic Link sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox (or Spam folder) for your verification code.`);
     }
 }
 
 async function verifyEmailOTP(event) {
-    if (event) {
-        event.preventDefault();
-        if (event.stopPropagation) event.stopPropagation();
-    }
+    if (event) event.preventDefault();
     const otpInput = document.getElementById('email_otp_code');
     const otp = otpInput ? otpInput.value.trim() : '';
 
