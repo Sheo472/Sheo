@@ -497,13 +497,8 @@ async function sendEmailOTP(event) {
 
     if (supabaseClient) {
         try {
-            const redirectUrl = window.location.origin + window.location.pathname;
             const { data, error } = await supabaseClient.auth.signInWithOtp({
-                email: currentEmailOTP,
-                options: {
-                    shouldCreateUser: true,
-                    emailRedirectTo: redirectUrl
-                }
+                email: currentEmailOTP
             });
 
             if (error) {
@@ -528,20 +523,33 @@ async function sendEmailOTP(event) {
 
     if (!sendSuccess) {
         const isRateLimit = supaErrorMessage.toLowerCase().includes('rate limit');
+        const isHookError = supaErrorMessage.toLowerCase().includes('hook') || supaErrorMessage.includes('405');
+
         if (errorBox) {
             errorBox.style.display = 'block';
             if (isRateLimit) {
                 errorBox.innerHTML = `⚠️ <strong>Supabase Email Rate Limit Exceeded</strong><br><br>
                 Supabase limits free default emails to 3-4 per hour.<br>
                 To enable unlimited real-time delivery: Enable <strong>Custom SMTP (Gmail/Resend)</strong> in Supabase Dashboard.`;
+            } else if (isHookError) {
+                errorBox.innerHTML = `⚠️ <strong>Supabase Auth Hook Error (405 Method Not Allowed)</strong><br><br>
+                An active Auth Hook in your Supabase Dashboard is failing.<br><br>
+                <strong>How to Fix in Supabase Dashboard:</strong><br>
+                1. Go to <strong>Authentication</strong> → <strong>Hooks</strong>.<br>
+                2. <strong>Disable/Remove</strong> the failing Hook (e.g. "Send Email" or "Send SMS" hook).<br>
+                3. Save changes and try sending OTP again.`;
             } else {
                 errorBox.innerHTML = `❌ <strong>OTP Dispatch Failed:</strong> ${supaErrorMessage}`;
             }
         }
-        alert(isRateLimit 
-            ? `⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nWhy this happens:\nSupabase limits default free email sending to 3-4 emails/hour per project.\n\nSolution for Production:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`
-            : `❌ Failed to send OTP: ${supaErrorMessage}`
-        );
+
+        if (isHookError) {
+            alert(`⚠️ Supabase Auth Hook Error (405 Method Not Allowed)\n\nError: ${supaErrorMessage}\n\nCause:\nAn Auth Hook (e.g., Send Email Hook) is enabled in your Supabase Dashboard with a URL returning HTTP 405.\n\nQuick Fix:\n1. Open Supabase Dashboard -> Authentication -> Hooks\n2. Disable/Delete the failing Hook\n3. Save and re-test sending OTP.`);
+        } else if (isRateLimit) {
+            alert(`⚠️ Supabase Email Rate Limit Exceeded!\n\n${supaErrorMessage}\n\nSolution:\nTurn ON 'Enable Custom SMTP' in Supabase Dashboard -> Authentication -> Email Settings.`);
+        } else {
+            alert(`❌ Failed to send OTP: ${supaErrorMessage}`);
+        }
         return;
     }
 
