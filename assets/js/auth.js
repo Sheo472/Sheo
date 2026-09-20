@@ -11,7 +11,10 @@ if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_UR
     } catch (e) {
         console.warn('Supabase client init error:', e);
     }
-}
+// --- EmailJS Configuration ---
+let EMAILJS_SERVICE_ID = localStorage.getItem('EMAILJS_SERVICE_ID') || 'service_svmzhel';
+let EMAILJS_TEMPLATE_ID = localStorage.getItem('EMAILJS_TEMPLATE_ID') || ''; // Add Template ID here
+let EMAILJS_PUBLIC_KEY = localStorage.getItem('EMAILJS_PUBLIC_KEY') || '';   // Add Public Key here
 
 let currentMobileNo = '';
 let resendTimer = null;
@@ -502,9 +505,9 @@ async function sendEmailOTP(event) {
     let sentViaEmailJS = false;
 
     // Check for EmailJS credentials
-    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID');
-    let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID');
-    let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY');
+    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID') || EMAILJS_SERVICE_ID;
+    let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID') || EMAILJS_TEMPLATE_ID;
+    let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY') || EMAILJS_PUBLIC_KEY;
 
     // Prompt for EmailJS keys if not configured yet
     if ((!emailjsService || !emailjsTemplate || !emailjsPublic) && typeof emailjs !== 'undefined') {
