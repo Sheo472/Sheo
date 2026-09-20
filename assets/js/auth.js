@@ -554,17 +554,34 @@ async function sendEmailOTP(event) {
     otpExpiryTimestamp = Date.now() + (60 * 1000); // 60 seconds
     start1MinOTPTimer();
 
-    // Dispatch Email in background (EmailJS or Supabase)
+    // Dispatch Email via EmailJS
     let sendSuccess = false;
     let sentViaEmailJS = false;
 
-    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID') || (typeof EMAILJS_SERVICE_ID !== 'undefined' ? EMAILJS_SERVICE_ID : '');
+    let emailjsService = localStorage.getItem('EMAILJS_SERVICE_ID') || (typeof EMAILJS_SERVICE_ID !== 'undefined' ? EMAILJS_SERVICE_ID : 'service_svmzhel');
     let emailjsTemplate = localStorage.getItem('EMAILJS_TEMPLATE_ID') || (typeof EMAILJS_TEMPLATE_ID !== 'undefined' ? EMAILJS_TEMPLATE_ID : '');
     let emailjsPublic = localStorage.getItem('EMAILJS_PUBLIC_KEY') || (typeof EMAILJS_PUBLIC_KEY !== 'undefined' ? EMAILJS_PUBLIC_KEY : '');
 
+    // Prompt for missing EmailJS Template ID & Public Key if not saved yet
+    if ((!emailjsTemplate || !emailjsPublic) && typeof emailjs !== 'undefined') {
+        const inputKeys = prompt(
+            "✉️ EmailJS Shoes Factory Custom Template Setup:\n\nService ID is set to: service_svmzhel\n\nPlease enter your EmailJS Template ID and Public Key separated by commas:\n\nFormat: TEMPLATE_ID, PUBLIC_KEY\nExample: template_xyz123, pub_abc456"
+        );
+        if (inputKeys) {
+            const parts = inputKeys.split(',').map(s => s.trim());
+            if (parts.length >= 2 && parts[0] && parts[1]) {
+                emailjsTemplate = parts[0];
+                emailjsPublic = parts[1];
+                localStorage.setItem('EMAILJS_SERVICE_ID', emailjsService);
+                localStorage.setItem('EMAILJS_TEMPLATE_ID', emailjsTemplate);
+                localStorage.setItem('EMAILJS_PUBLIC_KEY', emailjsPublic);
+            }
+        }
+    }
+
     if (emailjsService && emailjsTemplate && emailjsPublic && typeof emailjs !== 'undefined') {
         try {
-            console.log(`✉️ Sending OTP (${localGeneratedOTP}) via EmailJS to ${currentEmailOTP}...`);
+            console.log(`✉️ Sending Shoes Factory Custom HTML OTP (${localGeneratedOTP}) via EmailJS to ${currentEmailOTP}...`);
             const templateParams = {
                 to_email: currentEmailOTP,
                 email: currentEmailOTP,
@@ -578,13 +595,16 @@ async function sendEmailOTP(event) {
             await emailjs.send(emailjsService, emailjsTemplate, templateParams, emailjsPublic);
             sendSuccess = true;
             sentViaEmailJS = true;
-            console.log(`✅ Custom OTP email dispatched successfully via EmailJS!`);
+            console.log(`✅ Shoes Factory Custom HTML Email dispatched via EmailJS!`);
+            alert(`✅ Shoes Factory Custom HTML Email sent to ${currentEmailOTP}!\n\nPlease check your Gmail Inbox for your 6-digit code (${localGeneratedOTP}).`);
         } catch (ejsErr) {
-            console.warn("EmailJS Notice:", ejsErr);
+            console.warn("EmailJS Error:", ejsErr);
+            alert(`⚠️ EmailJS Notice: ${ejsErr.text || ejsErr.message || JSON.stringify(ejsErr)}`);
         }
     }
 
-    if (!sendSuccess && supabaseClient) {
+    // Only fallback to Supabase default email if EmailJS was not configured
+    if (!sendSuccess && !emailjsTemplate && supabaseClient) {
         try {
             const redirectUrl = window.location.href.includes('github.io')
                 ? 'https://sheo472.github.io/Sheo/login.html'
@@ -594,7 +614,7 @@ async function sendEmailOTP(event) {
                 email: currentEmailOTP,
                 options: { emailRedirectTo: redirectUrl }
             });
-            console.log(`✅ Supabase OTP request dispatched`);
+            console.log(`✅ Supabase default fallback email requested`);
         } catch (err) {
             console.warn("Supabase OTP Notice:", err);
         }
